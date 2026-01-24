@@ -1,19 +1,36 @@
 import { PrismaClient } from '@prisma/client'
 
 const prismaClientSingleton = () => {
-    // Build sırasında env yoksa dummy kullan
-    const url = process.env.DATABASE_URL || 'postgresql://dummy:dummy@localhost:5432/dummy';
+    // Coolify build ortamında DATABASE_URL eksik olabilir.
+    // Bu durumda gerçek bir Prisma Client yerine sahte (Mock) bir obje döndürürüz.
+    // Böylece build sırasında veritabanı bağlantı hatası almayız.
+    if (!process.env.DATABASE_URL) {
+        console.warn("⚠️  DATABASE_URL missing. Using Mock Prisma Client to bypass build errors.");
 
-    // Prisma sürümüne göre doğru parametreyi bulmak için ikisini de deneyelim
-    // TypeScript build hatasını önlemek için 'as any' kullanıyoruz.
-    return new PrismaClient({
-        datasources: {
-            db: {
-                url: url,
-            },
-        },
-        datasourceUrl: url,
-    } as any)
+        // Proxy kullanarak her türlü çağrıyı yakalayıp boş döndüren Mock Client
+        return new Proxy({}, {
+            get: (target, prop) => {
+                // $connect ve $disconnect taklitleri
+                if (prop === '$connect' || prop === '$disconnect') {
+                    return async () => { };
+                }
+
+                // Model erişimlerini (prisma.product, prisma.user vb.) taklit et
+                return new Proxy({}, {
+                    get: (modelTarget, modelProp) => {
+                        // findMany, findUnique, create vb. fonksiyonları taklit et
+                        return async () => {
+                            console.warn(`Mock Prisma call: ${String(prop)}.${String(modelProp)}`);
+                            return []; // Boş dizi veya null döndür
+                        };
+                    }
+                });
+            }
+        }) as unknown as PrismaClient;
+    }
+
+    // Normal ortamda gerçek client döndür
+    return new PrismaClient();
 }
 
 declare global {
