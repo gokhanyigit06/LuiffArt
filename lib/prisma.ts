@@ -1,14 +1,19 @@
 import { PrismaClient } from '@prisma/client'
 
 const prismaClientSingleton = () => {
-    // Build-time defansif: Eğer DATABASE_URL tanımlı değilse,
-    // Prisma'nın hata vermemesi için sahte bir connection string atıyoruz.
-    // Bu sadece build aşamasında 'generateStaticParams' gibi fonksiyonların çökmemesi içindir.
-    if (!process.env.DATABASE_URL) {
-        process.env.DATABASE_URL = 'postgresql://build:build@localhost:5432/build_db';
-    }
+    // Build sırasında env yoksa dummy kullan
+    const url = process.env.DATABASE_URL || 'postgresql://dummy:dummy@localhost:5432/dummy';
 
-    return new PrismaClient();
+    // Prisma sürümüne göre doğru parametreyi bulmak için ikisini de deneyelim
+    // TypeScript build hatasını önlemek için 'as any' kullanıyoruz.
+    return new PrismaClient({
+        datasources: {
+            db: {
+                url: url,
+            },
+        },
+        datasourceUrl: url,
+    } as any)
 }
 
 declare global {
