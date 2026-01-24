@@ -4,14 +4,16 @@ const prismaClientSingleton = () => {
     // Defend against build-time missing env vars
     const url = process.env.DATABASE_URL || 'postgresql://user:password@localhost:5432/mydb?schema=public';
 
-    // @ts-ignore
-    return new PrismaClient({
+    // Type assertion to bypass strict check
+    const options: any = {
         datasources: {
             db: {
                 url,
             },
         },
-    })
+    };
+
+    return new PrismaClient(options);
 }
 
 declare global {
