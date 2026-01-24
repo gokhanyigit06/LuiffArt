@@ -1,0 +1,147 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Enums
+enum Role {
+  USER
+  ADMIN
+}
+
+enum Currency {
+  TRY
+  USD
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  PREPARING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  REFUNDED
+}
+
+// Models
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  password      String?
+  role          Role      @default(USER)
+  
+  orders        Order[]
+  addresses     Address[]
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Address {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  
+  title     String
+  fullName  String
+  phone     String
+  country   String
+  city      String
+  district  String
+  address   String   @db.Text
+  zipCode   String?
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Category {
+  id        String    @id @default(cuid())
+  name      String
+  slug      String    @unique
+  products  Product[]
+}
+
+model Product {
+  id          String           @id @default(cuid())
+  name        String
+  slug        String           @unique
+  description String?          @db.Text
+  images      String[]
+  isActive    Boolean          @default(true)
+  categoryId  String?
+  category    Category?        @relation(fields: [categoryId], references: [id])
+  
+  // Ürüne ait farklı boyut/çerçeve seçenekleri
+  variants    ProductVariant[]
+  
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+}
+
+model ProductVariant {
+  id          String   @id @default(cuid())
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  size        String   // Örn: 50x70
+  material    String   // Örn: Çerçeveli, Kanvas, Poster
+  sku         String   @unique // Stok kodu (Navlungo için önemli)
+  
+  // Bölgesel Fiyatlandırma (Varyant bazlı)
+  priceTRY    Decimal  @db.Decimal(10, 2)
+  priceUSD    Decimal  @db.Decimal(10, 2)
+  
+  // Lojistik Verileri (Varyant bazlı desi değişir)
+  weight      Float?
+  desi        Float?
+  width       Float?
+  height      Float?
+  depth       Float?
+  
+  stock       Int      @default(0)
+
+  orderItems  OrderItem[]
+}
+
+model Order {
+  id                   String      @id @default(cuid())
+  userId               String?
+  user                 User?       @relation(fields: [userId], references: [id])
+  status               OrderStatus @default(PENDING)
+  totalAmount          Decimal     @db.Decimal(10, 2)
+  currency             Currency    @default(TRY)
+  
+  // Iyzico
+  iyzicoPaymentId      String?
+  paymentStatus        String?
+  
+  // Navlungo
+  shippingProvider     String?     // "NAVLUNGO_PARK" veya "NAVLUNGO_INT"
+  trackingCode         String?
+  trackingUrl          String?
+  
+  shippingAddress      Json
+  billingAddress       Json
+  
+  orderItems           OrderItem[]
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+}
+
+model OrderItem {
+  id               String         @id @default(cuid())
+  orderId          String
+  order            Order          @relation(fields: [orderId], references: [id])
+  
+  productVariantId String
+  productVariant   ProductVariant @relation(fields: [productVariantId], references: [id])
+  
+  quantity         Int
+  price            Decimal        @db.Decimal(10, 2)
+}
