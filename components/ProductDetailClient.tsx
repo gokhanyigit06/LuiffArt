@@ -11,7 +11,11 @@ import type { Product, ProductVariant, Category } from '@prisma/client';
 
 interface ProductDetailProps {
     product: Product & {
-        variants: (ProductVariant & { desi?: number | null })[];
+        variants: (Omit<ProductVariant, 'priceTRY' | 'priceUSD'> & {
+            priceTRY: number;
+            priceUSD: number;
+            desi?: number | null
+        })[];
         category: Category | null;
     };
 }
