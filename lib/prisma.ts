@@ -1,19 +1,13 @@
 import { PrismaClient } from '@prisma/client'
 
 const prismaClientSingleton = () => {
-    // Defend against build-time missing env vars
-    const url = process.env.DATABASE_URL || 'postgresql://user:password@localhost:5432/mydb?schema=public';
+    // Fallback for build-time if env is missing to prevent initialization errors
+    // ensuring Next.js build can proceed even without DB connection
+    if (!process.env.DATABASE_URL) {
+        process.env.DATABASE_URL = 'postgresql://user:password@localhost:5432/mydb?schema=public';
+    }
 
-    // Type assertion to bypass strict check
-    const options: any = {
-        datasources: {
-            db: {
-                url,
-            },
-        },
-    };
-
-    return new PrismaClient(options);
+    return new PrismaClient()
 }
 
 declare global {
