@@ -5,16 +5,24 @@ import { notFound } from "next/navigation";
 
 // SEO Metadata generation
 export async function generateMetadata({ params }: { params: { slug: string } }) {
-    const { slug } = await params;
-    const product = await prisma.product.findUnique({
-        where: { slug }
-    });
+    try {
+        const { slug } = await params;
+        const product = await prisma.product.findUnique({
+            where: { slug }
+        });
 
-    if (!product) return {};
+        if (!product) return {};
 
-    return {
-        title: `${product.name} | Luiff Art`,
-        description: product.description?.slice(0, 160) || 'Modern Art Store',
+        return {
+            title: `${product.name} | Luiff Art`,
+            description: product.description?.slice(0, 160) || 'Modern Art Store',
+        }
+    } catch (e) {
+        console.warn('Failed to generate metadata for product', e);
+        return {
+            title: 'Luiff Art',
+            description: 'Modern Art Store'
+        };
     }
 }
 
