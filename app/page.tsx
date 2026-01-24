@@ -4,7 +4,8 @@ import ProductCard from "@/components/ProductCard";
 import prisma from "@/lib/prisma";
 
 // Revalidate data every hour
-export const revalidate = 3600;
+// export const revalidate = 3600;
+export const dynamic = 'force-dynamic';
 
 async function getFeaturedProducts() {
   const products = await prisma.product.findMany({
