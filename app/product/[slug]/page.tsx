@@ -3,6 +3,8 @@ import ProductDetailClient from "@/components/ProductDetailClient";
 import prisma from "@/lib/prisma";
 import { notFound } from "next/navigation";
 
+export const dynamic = 'force-dynamic';
+
 // SEO Metadata generation
 export async function generateMetadata({ params }: { params: { slug: string } }) {
     try {
