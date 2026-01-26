@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AntdRegistry } from '@ant-design/nextjs-registry';
 import { RegionProvider } from "@/components/providers/RegionProvider";
+import { AuthProvider } from "@/components/providers/AuthProvider";
 import { cookies } from "next/headers";
 import { REGION_COOKIE_NAME, RegionCode } from "@/types/region";
 
@@ -14,6 +15,20 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+import { Bodoni_Moda, Outfit } from "next/font/google";
+
+const bodoni = Bodoni_Moda({
+  subsets: ["latin", "latin-ext"],
+  variable: "--font-italiana", // Keeping the same variable name to preserve existing styles
+  display: "swap",
+});
+
+const outfit = Outfit({
+  subsets: ["latin", "latin-ext"],
+  variable: "--font-outfit",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -33,12 +48,14 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${bodoni.variable} ${outfit.variable} antialiased`}
       >
         <AntdRegistry>
-          <RegionProvider initialRegion={initialRegion}>
-            {children}
-          </RegionProvider>
+          <AuthProvider>
+            <RegionProvider initialRegion={initialRegion}>
+              {children}
+            </RegionProvider>
+          </AuthProvider>
         </AntdRegistry>
       </body>
     </html>

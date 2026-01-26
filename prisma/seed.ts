@@ -1,4 +1,9 @@
 import { PrismaClient, Role } from '@prisma/client'
+import * as dotenv from 'dotenv'
+import path from 'path'
+
+// Load .env from project root
+dotenv.config({ path: path.resolve(__dirname, '../.env') })
 
 const prisma = new PrismaClient()
 
@@ -10,6 +15,33 @@ async function main() {
         create: {
             name: 'Soyut Sanat',
             slug: 'abstract-art',
+        },
+    })
+
+    const catModern = await prisma.category.upsert({
+        where: { slug: 'modern-art' },
+        update: {},
+        create: {
+            name: 'Modern Sanat',
+            slug: 'modern-art',
+        },
+    })
+
+    const catNature = await prisma.category.upsert({
+        where: { slug: 'nature' },
+        update: {},
+        create: {
+            name: 'Doğa',
+            slug: 'nature',
+        },
+    })
+
+    const catMinimal = await prisma.category.upsert({
+        where: { slug: 'minimalist' },
+        update: {},
+        create: {
+            name: 'Minimalist',
+            slug: 'minimalist',
         },
     })
 

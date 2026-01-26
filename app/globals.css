@@ -1,49 +1,60 @@
-@import url('https://fonts.googleapis.com/css2?family=Italiana&family=Outfit:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Italiana&family=Outfit:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Clean Professional Palette */
+  --background: #F5F7FA;
+  --foreground: #1a202c;
+  --sidebar-bg: #001529;
+  --card-bg: #ffffff;
+
+  /* Luxury Art Gallery Accents */
+  --luxury-black: #1a1a1a;
+  --luxury-gold: #D4AF37;
+  --luxury-gold-dark: #B8941F;
+
+  /* Fonts */
   --font-italiana: 'Italiana', serif;
   --font-outfit: 'Outfit', sans-serif;
-  --glass-border: rgba(255, 255, 255, 0.2);
-  --glass-bg: rgba(255, 255, 255, 0.05);
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-outfit);
 }
 
 @layer utilities {
   .font-italiana {
     font-family: var(--font-italiana);
   }
+
   .font-outfit {
     font-family: var(--font-outfit);
-  }
-  .glass-panel {
-    background: var(--glass-bg);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid var(--glass-border);
   }
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-outfit);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Luxury Button Overrides */
+.ant-btn-primary {
+  background-color: var(--luxury-black) !important;
+  border-color: var(--luxury-black) !important;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.ant-btn-primary:hover {
+  background-color: var(--luxury-gold-dark) !important;
+  border-color: var(--luxury-gold-dark) !important;
+}
+
+.ant-btn-primary:focus {
+  background-color: var(--luxury-black) !important;
+  border-color: var(--luxury-gold) !important;
 }

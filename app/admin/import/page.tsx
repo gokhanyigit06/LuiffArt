@@ -47,19 +47,20 @@ export default function ImportPage() {
 
             <Card className="shadow-sm">
                 <Steps
+                    orientation="horizontal"
                     current={currentStep}
                     items={[
                         {
                             title: 'Upload CSV',
-                            description: 'Shopify format supported',
+                            content: 'Shopify format supported',
                         },
                         {
                             title: 'Processing',
-                            description: 'Parsing & Validation',
+                            content: 'Parsing & Validation',
                         },
                         {
                             title: 'Done',
-                            description: 'Products created',
+                            content: 'Products created',
                         },
                     ]}
                     className="mb-12"

@@ -5,6 +5,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 // Enums
@@ -28,6 +29,22 @@ enum OrderStatus {
   REFUNDED
 }
 
+enum FulfillmentStatus {
+  UNFULFILLED
+  PARTIALLY_FULFILLED
+  FULFILLED
+  RESTOCKED
+}
+
+enum PaymentStatus {
+  PENDING
+  AUTHORIZED
+  PAID
+  PARTIALLY_REFUNDED
+  REFUNDED
+  VOIDED
+}
+
 // Models
 model User {
   id            String    @id @default(cuid())
@@ -35,9 +52,17 @@ model User {
   email         String    @unique
   password      String?
   role          Role      @default(USER)
+  phone         String?
+  
+  // Corporate info
+  isCorporate   Boolean   @default(false)
+  companyName   String?
+  taxNumber     String?
+  taxOffice     String?
   
   orders        Order[]
   addresses     Address[]
+  coupons       Coupon[]
   
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -78,6 +103,15 @@ model Product {
   categoryId  String?
   category    Category?        @relation(fields: [categoryId], references: [id])
   
+  // Yeni Alanlar (Shopify-like)
+  tags        String[]         // Etiketler
+  productType String?          // Ürün Türü (Örn: Tablo, Heykel)
+  vendor      String?          // Satıcı/Marka
+  
+  // SEO
+  seoTitle       String?
+  seoDescription String?
+  
   // Ürüne ait farklı boyut/çerçeve seçenekleri
   variants    ProductVariant[]
   
@@ -93,10 +127,16 @@ model ProductVariant {
   size        String   // Örn: 50x70
   material    String   // Örn: Çerçeveli, Kanvas, Poster
   sku         String   @unique // Stok kodu (Navlungo için önemli)
+  barcode     String?  // Barkod (EAN/UPC)
   
   // Bölgesel Fiyatlandırma (Varyant bazlı)
-  priceTRY    Decimal  @db.Decimal(10, 2)
-  priceUSD    Decimal  @db.Decimal(10, 2)
+  priceTRY          Decimal  @db.Decimal(10, 2)
+  compareAtPriceTRY Decimal? @db.Decimal(10, 2) // İndirim öncesi fiyat (Çizili)
+  costPriceTRY      Decimal? @db.Decimal(10, 2) // Maliyet
+  
+  priceUSD          Decimal  @db.Decimal(10, 2)
+  compareAtPriceUSD Decimal? @db.Decimal(10, 2)
+  costPriceUSD      Decimal? @db.Decimal(10, 2)
   
   // Lojistik Verileri (Varyant bazlı desi değişir)
   weight      Float?
@@ -105,34 +145,68 @@ model ProductVariant {
   height      Float?
   depth       Float?
   
-  stock       Int      @default(0)
+  stock         Int      @default(0)
+  trackQuantity Boolean  @default(true) // Stok takibi yapılsın mı?
 
   orderItems  OrderItem[]
 }
 
 model Order {
-  id                   String      @id @default(cuid())
+  id                   String            @id @default(cuid())
   userId               String?
-  user                 User?       @relation(fields: [userId], references: [id])
-  status               OrderStatus @default(PENDING)
-  totalAmount          Decimal     @db.Decimal(10, 2)
-  currency             Currency    @default(TRY)
+  user                 User?             @relation(fields: [userId], references: [id])
   
-  // Iyzico
+  // Status Tracking
+  status               OrderStatus       @default(PENDING)
+  fulfillmentStatus    FulfillmentStatus @default(UNFULFILLED)
+  paymentStatus        PaymentStatus     @default(PENDING)
+  
+  // Financial Details
+  subtotal             Decimal           @db.Decimal(10, 2)
+  taxAmount            Decimal?          @db.Decimal(10, 2)
+  shippingCost         Decimal?          @db.Decimal(10, 2)
+  discountAmount       Decimal?          @db.Decimal(10, 2)
+  couponCode           String?           // Applied discount code
+  totalAmount          Decimal           @db.Decimal(10, 2)
+  currency             Currency          @default(TRY)
+  
+  // Payment Integration (Iyzico)
   iyzicoPaymentId      String?
-  paymentStatus        String?
+  iyzicoConversationId String?
   
-  // Navlungo
-  shippingProvider     String?     // "NAVLUNGO_PARK" veya "NAVLUNGO_INT"
+  // Shipping Integration (Navlungo)
+  shippingProvider     String?           // "NAVLUNGO_PARK" or "NAVLUNGO_INT"
   trackingCode         String?
   trackingUrl          String?
   
+  // Addresses
   shippingAddress      Json
   billingAddress       Json
   
+  // Notes
+  customerNote         String?           @db.Text
+  internalNote         String?           @db.Text
+
+  // Friendly Order Number (e.g. #1001)
+  orderNumber          Int               @unique @default(autoincrement())
+  
+  // Relations
   orderItems           OrderItem[]
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
+  fulfillments         Fulfillment[]
+  refunds              Refund[]
+  events               OrderEvent[]
+  
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+}
+
+model OrderEvent {
+  id        String      @id @default(cuid())
+  orderId   String
+  order     Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  status    OrderStatus
+  note      String?
+  createdAt DateTime    @default(now())
 }
 
 model OrderItem {
@@ -145,4 +219,105 @@ model OrderItem {
   
   quantity         Int
   price            Decimal        @db.Decimal(10, 2)
+  
+  fulfillmentItems FulfillmentItem[]
+  refundItems      RefundItem[]
 }
+
+model Fulfillment {
+  id                String            @id @default(cuid())
+  orderId           String
+  order             Order             @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  
+  status            String            // PENDING, IN_TRANSIT, DELIVERED, FAILED
+  trackingCompany   String?           // NAVLUNGO, UPS, DHL, etc.
+  trackingNumber    String?
+  trackingUrl       String?
+  
+  shippedAt         DateTime?
+  estimatedDelivery DateTime?
+  deliveredAt       DateTime?
+  
+  items             FulfillmentItem[]
+  
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+}
+
+model FulfillmentItem {
+  id            String      @id @default(cuid())
+  fulfillmentId String
+  fulfillment   Fulfillment @relation(fields: [fulfillmentId], references: [id], onDelete: Cascade)
+  
+  orderItemId   String
+  orderItem     OrderItem   @relation(fields: [orderItemId], references: [id])
+  
+  quantity      Int
+}
+
+model Refund {
+  id           String       @id @default(cuid())
+  orderId      String
+  order        Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  
+  amount       Decimal      @db.Decimal(10, 2)
+  reason       String?      @db.Text
+  restockItems Boolean      @default(true)
+  
+  items        RefundItem[]
+  
+  createdAt    DateTime     @default(now())
+}
+
+model RefundItem {
+  id          String    @id @default(cuid())
+  refundId    String
+  refund      Refund    @relation(fields: [refundId], references: [id], onDelete: Cascade)
+  
+  orderItemId String
+  orderItem   OrderItem @relation(fields: [orderItemId], references: [id])
+  
+  quantity    Int
+  amount      Decimal   @db.Decimal(10, 2)
+}
+
+model Coupon {
+  id               String    @id @default(cuid())
+  code             String    @unique
+  type             String    // PERCENTAGE, FIXED_AMOUNT
+  value            Decimal   @db.Decimal(10, 2)
+  
+  startDate        DateTime?
+  endDate          DateTime?
+  usageLimit       Int?
+  usedCount        Int       @default(0)
+  isActive         Boolean   @default(true)
+  
+  // Optional: restrict to specific customer
+  userId           String?
+  user             User?     @relation(fields: [userId], references: [id])
+  
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  
+  campaigns        Campaign[]
+}
+
+model Campaign {
+  id             String    @id @default(cuid())
+  title          String
+  slug           String    @unique
+  description    String?   @db.Text
+  bannerUrl      String?
+  
+  startDate      DateTime?
+  endDate        DateTime?
+  isActive       Boolean   @default(true)
+  
+  couponId       String?
+  coupon         Coupon?   @relation(fields: [couponId], references: [id])
+  
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+

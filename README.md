@@ -1,36 +1,61 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🎨 Luiff Art - E-Ticaret Yönetim Paneli
 
-## Getting Started
+Bu proje, **Next.js 16**, **Ant Design** ve **Prisma (PostgreSQL)** kullanılarak geliştirilmiş modern bir e-ticaret yönetim panelidir.
 
-First, run the development server:
+## 📂 Proje Yapısı
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- **`/app/admin`**: Yönetim paneli sayfaları (Dashboard, Ürünler, Kategoriler).
+- **`/app/api/admin`**: Backend API rotaları.
+- **`/lib`**: Yardımcı kütüphaneler (Prisma Client, vb.).
+- **`/prisma`**: Veritabanı şeması ve seed dosyaları.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🚀 Başlangıç
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Gereksinimler
+- Node.js 18+
+- PostgreSQL Veritabanı
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Kurulum
 
-## Learn More
+1. **Bağımlılıkları Yükle:**
+   ```bash
+   npm install
+   ```
+2. **Setup .env:**
+   `.env` dosyasında `DATABASE_URL` tanımlı olmalıdır.
 
-To learn more about Next.js, take a look at the following resources:
+3. **Veritabanını Hazırla:**
+   ```bash
+   npx prisma db push  # Şemayı veritabanına gönder
+   npx prisma generate # Prisma Client'ı oluştur (v5.22.0)
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+4. **Sunucuyu Başlat:**
+   ```bash
+   npm run dev
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🛠️ Teknoloji Yığını
 
-## Deploy on Vercel
+- **Framework:** Next.js 16 (App Router)
+- **UI Kit:** Ant Design (v5) + Ant Design Charts
+- **ORM:** Prisma v5.22.0 (Stable) - *v7 kullanmayın, Next.js Turbopack ile uyumsuz.*
+- **Database:** PostgreSQL
+- **Docs:** Swagger UI (`/api-doc`)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🤖 Ajanlar İçin Notlar (Multi-Agent Guidelines)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Eğer bu projede çalışan bir yapay zeka ajanıysanız, lütfen aşağıdaki kurallara uyun:
+
+1.  **Prisma Değişiklikleri:** `schema.prisma` dosyasında değişiklik yaparsanız MUTLAKA terminalde `npx prisma db push` ve `npx prisma generate` komutlarını çalıştırın.
+2.  **API Rotaları:** Tüm API endpointleri `/app/api/admin` altındadır ve `NextResponse` kullanır.
+3.  **UI Kuralları:** Sadece **Ant Design** bileşenleri kullanın. TailwindCSS yüklüdür ancak Ant Design'ın kendi stil sistemi (prop tabanlı) önceliklidir.
+4.  **Durum:** Projenin son durumunu `PROJECT_STATUS.md` dosyasından takip edin.
+
+## ✨ Mevcut Özellikler
+- ✅ Ürün Yönetimi (Shopify benzeri: Varyantlar, SEO, Fiyatlandırma)
+- ✅ Kategori Yönetimi
+- ✅ Swagger API Dokümantasyonu
+
+---
+*Geliştirme: Antigravity Agent*

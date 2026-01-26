@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Form, Input, Radio, Button, Checkbox, Select, Divider, Tooltip } from 'antd';
+import { Form, Input, Radio, Button, Checkbox, Select, Divider, Tooltip, message, Tag } from 'antd';
 import { useCart } from '@/lib/store/useCart';
 import { useRegion } from '@/components/providers/RegionProvider';
 import Image from 'next/image';
@@ -21,8 +21,46 @@ export default function CheckoutClient() {
     const [isSuccess, setIsSuccess] = useState(false);
     const [shippingCountry, setShippingCountry] = useState(region === 'TR' ? 'Turkey' : 'United States');
 
+    // Coupon States
+    const [couponCode, setCouponCode] = useState('');
+    const [appliedCoupon, setAppliedCoupon] = useState<{ type: string; value: number; code: string } | null>(null);
+    const [isValidatingCoupon, setIsValidatingCoupon] = useState(false);
+
     const { total, count } = getTotals(region === 'TR' ? 'TR' : 'GLOBAL');
     const symbol = region === 'TR' ? '₺' : '$';
+
+    const handleApplyCoupon = async () => {
+        if (!couponCode) return;
+        setIsValidatingCoupon(true);
+        try {
+            const res = await fetch('/api/checkout/validate-coupon', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code: couponCode })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                setAppliedCoupon(data);
+                message.success('Kupon uygulandı!');
+            } else {
+                message.error(data.error || 'Geçersiz kupon');
+            }
+        } catch (error) {
+            message.error('Kupon eklenirken hata oluştu');
+        } finally {
+            setIsValidatingCoupon(false);
+        }
+    };
+
+    const calculateDiscount = () => {
+        if (!appliedCoupon) return 0;
+        if (appliedCoupon.type === 'PERCENTAGE') {
+            return (total * appliedCoupon.value) / 100;
+        }
+        return appliedCoupon.value;
+    };
+
+    const discountAmount = calculateDiscount();
 
     // Calculate simulated shipping cost based on cart items
     useEffect(() => {
@@ -150,8 +188,54 @@ export default function CheckoutClient() {
                         </div>
                         <div className="flex justify-between text-xl font-medium text-gray-900 pt-4 border-t border-gray-200/60">
                             <span>Total</span>
-                            <span>{symbol}{finalTotal.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                            <span>{symbol}{(finalTotal - discountAmount).toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
                         </div>
+
+                        {/* Applied Coupon Tag */}
+                        {appliedCoupon && (
+                            <div className="mt-4 flex items-center justify-between bg-green-50 p-3 rounded-lg border border-green-100 animate-pulse">
+                                <div className="flex items-center gap-2">
+                                    <Tag color="green" className="!m-0">{appliedCoupon.code}</Tag>
+                                    <span className="text-xs text-green-700 font-medium font-outfit">
+                                        Applied {appliedCoupon.type === 'PERCENTAGE' ? `${appliedCoupon.value}%` : `${symbol}${appliedCoupon.value}`} discount
+                                    </span>
+                                </div>
+                                <Button
+                                    type="text"
+                                    size="small"
+                                    danger
+                                    onClick={() => {
+                                        setAppliedCoupon(null);
+                                        setCouponCode('');
+                                    }}
+                                    className="!text-[10px] !font-outfit !uppercase !tracking-widest"
+                                >
+                                    Remove
+                                </Button>
+                            </div>
+                        )}
+
+                        {/* Coupon Input */}
+                        {!appliedCoupon && (
+                            <div className="mt-8">
+                                <div className="flex gap-2">
+                                    <Input
+                                        placeholder="Discount Code"
+                                        value={couponCode}
+                                        onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                                        className="!h-10 !rounded-none !border-gray-200 focus:!border-black font-outfit"
+                                        onPressEnter={handleApplyCoupon}
+                                    />
+                                    <Button
+                                        onClick={handleApplyCoupon}
+                                        loading={isValidatingCoupon}
+                                        className="!h-10 !rounded-none !bg-gray-100 !border-gray-200 !text-gray-900 !font-outfit !uppercase !tracking-widest hover:!border-black hover:!text-black"
+                                    >
+                                        Apply
+                                    </Button>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

@@ -25,7 +25,7 @@ export default function CartDrawer() {
             placement="right"
             onClose={closeCart}
             open={isOpen}
-            width={450}
+            size="default"
             closeIcon={<CloseOutlined className="text-lg hover:rotate-90 transition-transform duration-300" />}
             classNames={{
                 header: '!border-b !border-gray-100 !p-6',

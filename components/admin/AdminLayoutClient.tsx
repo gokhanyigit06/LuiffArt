@@ -1,19 +1,22 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Layout, Menu, Button, Avatar, Breadcrumb, Dropdown, theme } from 'antd';
+import { Layout, Menu, Button, Avatar, Dropdown } from 'antd';
 import {
     DashboardOutlined,
     ShoppingOutlined,
+    AppstoreOutlined,
+    ShoppingCartOutlined,
+    ImportOutlined,
     UserOutlined,
     SettingOutlined,
-    ImportOutlined,
+    LogoutOutlined,
     MenuFoldOutlined,
     MenuUnfoldOutlined,
-    LogoutOutlined
+    PercentageOutlined
 } from '@ant-design/icons';
 import { useRouter, usePathname } from 'next/navigation';
-import Link from 'next/link';
+import { signOut } from 'next-auth/react';
 
 const { Header, Sider, Content } = Layout;
 
@@ -22,84 +25,113 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
     const router = useRouter();
     const pathname = usePathname();
 
-    const {
-        token: { colorBgContainer, borderRadiusLG },
-    } = theme.useToken();
+    if (pathname === '/admin/login') return <>{children}</>;
 
     const menuItems = [
-        {
-            key: '/admin',
-            icon: <DashboardOutlined />,
-            label: 'Overview',
-        },
-        {
-            key: '/admin/products',
-            icon: <ShoppingOutlined />,
-            label: 'Products',
-        },
-        {
-            key: '/admin/orders',
-            icon: <ShoppingOutlined />, // Using same icon temporarily
-            label: 'Orders',
-        },
-        {
-            key: '/admin/import',
-            icon: <ImportOutlined />,
-            label: 'Import CSV',
-        },
-        {
-            key: '/admin/customers',
-            icon: <UserOutlined />,
-            label: 'Customers',
-        },
-        {
-            key: '/admin/settings',
-            icon: <SettingOutlined />,
-            label: 'Settings',
-        },
+        { key: '/admin', icon: <DashboardOutlined />, label: 'Dashboard' },
+        { key: '/admin/products', icon: <ShoppingOutlined />, label: 'Products' },
+        { key: '/admin/categories', icon: <AppstoreOutlined />, label: 'Categories' },
+        { key: '/admin/orders', icon: <ShoppingCartOutlined />, label: 'Orders' },
+        { key: '/admin/customers', icon: <UserOutlined />, label: 'Customers' },
+        { key: '/admin/campaigns', icon: <PercentageOutlined />, label: 'Campaigns' },
+        { key: '/admin/import', icon: <ImportOutlined />, label: 'Import' },
+        { key: '/admin/settings', icon: <SettingOutlined />, label: 'Settings' },
     ];
+
+    const handleMenuClick = ({ key }: { key: string }) => {
+        if (key === 'logout') {
+            signOut({ callbackUrl: '/admin/login' });
+        } else {
+            router.push(key);
+        }
+    };
 
     return (
         <Layout style={{ minHeight: '100vh' }}>
-            <Sider trigger={null} collapsible collapsed={collapsed} theme="light" className="border-r border-gray-100 !fixed !h-screen !z-20">
-                <div className="h-16 flex items-center justify-center border-b border-gray-50">
-                    <span className={`font-italiana font-bold text-xl transition-opacity duration-300 ${collapsed ? 'opacity-0 w-0' : 'opacity-100'}`}>
-                        LUIFF
+            <Sider
+                trigger={null}
+                collapsible
+                collapsed={collapsed}
+                style={{
+                    position: 'fixed',
+                    left: 0,
+                    top: 0,
+                    bottom: 0,
+                    zIndex: 100
+                }}
+            >
+                <div style={{
+                    height: 64,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    borderBottom: '1px solid rgba(255,255,255,0.1)'
+                }}>
+                    <span style={{
+                        fontFamily: 'var(--font-italiana)',
+                        fontSize: collapsed ? 20 : 24,
+                        fontWeight: 'bold',
+                        color: 'white',
+                        transition: 'all 0.2s'
+                    }}>
+                        {collapsed ? 'L' : 'LUIFF'}
                     </span>
                 </div>
                 <Menu
-                    theme="light"
+                    theme="dark"
                     mode="inline"
                     selectedKeys={[pathname]}
-                    onClick={({ key }) => router.push(key)}
+                    onClick={handleMenuClick}
                     items={menuItems}
-                    className="!border-none mt-4 font-outfit"
+                    style={{ borderRight: 0, fontFamily: 'var(--font-outfit)' }}
                 />
             </Sider>
+
             <Layout style={{ marginLeft: collapsed ? 80 : 200, transition: 'all 0.2s' }}>
-                <Header style={{ padding: '0 24px', background: colorBgContainer }} className="flex justify-between items-center sticky top-0 z-10 border-b border-gray-100 !h-16">
+                <Header style={{
+                    padding: '0 24px',
+                    background: '#fff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    borderBottom: '1px solid #f0f0f0',
+                    position: 'sticky',
+                    top: 0,
+                    zIndex: 10
+                }}>
                     <Button
                         type="text"
                         icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
                         onClick={() => setCollapsed(!collapsed)}
-                        className="!w-10 !h-10 hover:!bg-black/5"
+                        style={{ fontSize: 16 }}
                     />
 
-                    <div className="flex items-center gap-4">
-                        <div className="text-right hidden sm:block">
-                            <div className="text-sm font-medium font-outfit">Admin User</div>
-                            <div className="text-xs text-gray-500 font-outfit">Store Manager</div>
+                    <Dropdown menu={{
+                        items: [
+                            { key: 'logout', label: 'Logout', icon: <LogoutOutlined />, danger: true }
+                        ],
+                        onClick: handleMenuClick
+                    }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }}>
+                            <Avatar
+                                style={{ backgroundColor: '#1890ff' }}
+                                icon={<UserOutlined />}
+                            />
+                            <div style={{ textAlign: 'left' }}>
+                                <div style={{ fontSize: 14, fontWeight: 500, lineHeight: '20px' }}>Admin User</div>
+                                <div style={{ fontSize: 12, color: '#8c8c8c', lineHeight: '16px' }}>Store Manager</div>
+                            </div>
                         </div>
-                        <Dropdown menu={{
-                            items: [
-                                { key: 'logout', label: 'Logout', icon: <LogoutOutlined />, danger: true }
-                            ]
-                        }}>
-                            <Avatar style={{ backgroundColor: '#000' }} icon={<UserOutlined />} className="cursor-pointer" />
-                        </Dropdown>
-                    </div>
+                    </Dropdown>
                 </Header>
-                <Content style={{ margin: '24px 24px', minHeight: 280 }}>
+
+                <Content style={{
+                    margin: '24px 16px',
+                    padding: 24,
+                    minHeight: 280,
+                    background: '#fff',
+                    borderRadius: 8
+                }}>
                     {children}
                 </Content>
             </Layout>
