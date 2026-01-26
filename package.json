@@ -29,6 +29,7 @@
     "recharts": "^3.7.0",
     "swagger-ui-react": "^5.31.0",
     "tailwind-merge": "^3.4.0",
+    "tree-sitter": "^0.22.4",
     "zustand": "^5.0.10"
   },
   "devDependencies": {
