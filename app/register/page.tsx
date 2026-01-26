@@ -261,7 +261,7 @@ export default function RegisterPage() {
                                         </Button>
                                     )}
                                 </div>
-                                <Text className="text-center !text-[10px] !text-gray-400 !uppercase !tracking-widest block mt-4">Tüm verileriniz 256-bit SSL ile korunmaktadır.</Text>
+                                <p className="text-center text-[10px] text-gray-400 uppercase tracking-widest block mt-4">Tüm verileriniz 256-bit SSL ile korunmaktadır.</p>
                             </div>
                         </Form>
                     </div>
