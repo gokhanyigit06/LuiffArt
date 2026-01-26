@@ -40,7 +40,8 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
 
     const handleMenuClick = ({ key }: { key: string }) => {
         if (key === 'logout') {
-            signOut({ callbackUrl: '/admin/login' });
+            const origin = typeof window !== 'undefined' ? window.location.origin : '';
+            signOut({ callbackUrl: `${origin}/admin/login` });
         } else {
             router.push(key);
         }
