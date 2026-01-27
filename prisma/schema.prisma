@@ -107,6 +107,7 @@ model Product {
   tags        String[]         // Etiketler
   productType String?          // Ürün Türü (Örn: Tablo, Heykel)
   vendor      String?          // Satıcı/Marka
+  modelCode   String?          // Trendyol Model Kodu (varyant gruplama için)
   
   // SEO
   seoTitle       String?

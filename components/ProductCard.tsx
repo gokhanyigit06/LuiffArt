@@ -37,7 +37,7 @@ export default function ProductCard({ id, name, slug, imageUrl, categoryName, pr
                 <div className="relative aspect-[3/4] overflow-hidden bg-[#f0f0f0]">
                     {categoryName && (
                         <div className="absolute top-3 left-3 z-10">
-                            <Tag bordered={false} className="glass-panel !text-xs !font-outfit !rounded-none !uppercase !px-2 !py-0.5 text-gray-800">
+                            <Tag variant="filled" className="glass-panel !text-xs !font-outfit !rounded-none !uppercase !px-2 !py-0.5 text-gray-800">
                                 {categoryName}
                             </Tag>
                         </div>
