@@ -105,11 +105,11 @@ async function main() {
             .replace(/^-+|-+$/g, '')
             .substring(0, 100);
 
-        // Görselleri topla
-        const images: string[] = [];
+        // Görselleri topla (Parent için - ilk varyantın görselleri)
+        const firstVariantImages: string[] = [];
         for (let i = 1; i <= 8; i++) {
             const img = firstVariant[`Görsel ${i}` as keyof TrendyolRow];
-            if (img) images.push(img);
+            if (img) firstVariantImages.push(img);
         }
 
         if (isDryRun) {
@@ -117,7 +117,7 @@ async function main() {
             console.log(`   Model: ${modelCode}`);
             console.log(`   Kategori: ${categoryName}`);
             console.log(`   Varyant Sayısı: ${variants.length}`);
-            console.log(`   Görsel: ${images.length} adet`);
+            console.log(`   Görsel: ${firstVariantImages.length} adet`);
             variants.forEach((v, i) => {
                 console.log(`   ${i + 1}. ${v['Ürün Rengi']} - ${v['Boyut/Ebat']} - ${v["Trendyol'da Satılacak Fiyat (KDV Dahil)"]} TL`);
             });
@@ -139,13 +139,14 @@ async function main() {
 
             const category = await prisma.category.findUnique({ where: { slug: categorySlug } });
 
-            // Ürün oluştur
+            // Ürün oluştur (Parent)
             const product = await prisma.product.create({
                 data: {
                     name: productName,
                     slug: productSlug,
                     description: firstVariant['Ürün Açıklaması'] || `${productName} - Yüksek kaliteli poster ve tablo`,
-                    images,
+                    // Parent görseli olarak ilk varyantınkileri kullan
+                    images: firstVariantImages,
                     isActive: true,
                     categoryId: category?.id,
                     vendor: firstVariant['Marka'],
@@ -160,6 +161,13 @@ async function main() {
                 const priceUSD = priceTRY / 34; // Yaklaşık kur
                 const stock = parseInt(variant['Ürün Stok Adedi'] || '0');
 
+                // Varyant görsellerini topla
+                const variantImages: string[] = [];
+                for (let i = 1; i <= 8; i++) {
+                    const img = variant[`Görsel ${i}` as keyof TrendyolRow];
+                    if (img) variantImages.push(img);
+                }
+
                 await prisma.productVariant.create({
                     data: {
                         productId: product.id,
@@ -170,7 +178,8 @@ async function main() {
                         priceTRY,
                         priceUSD,
                         stock,
-                        trackQuantity: true
+                        trackQuantity: true,
+                        images: variantImages // Varyanta özel görseller
                     }
                 });
             }
@@ -181,6 +190,7 @@ async function main() {
             }
         } catch (error: any) {
             console.error(`❌ Hata: ${productName} - ${error.message}`);
+            // Eğer variant unique constraint hatası alırsak (aynı barkod), atlayalım
             skipped++;
         }
     }
@@ -192,27 +202,22 @@ async function main() {
 
     if (!isDryRun && args.includes('--migrate')) {
         console.log('\n🖼️ Görsel Taşıma Başlatılıyor...');
-        // Tüm ürünleri çek ve filtrele
-        const allProducts = await prisma.product.findMany({
+
+        // 1. Parent ürün görsellerini taşı
+        const products = await prisma.product.findMany({
             select: { id: true, name: true, images: true }
         });
+        const targetProducts = products.filter(p => p.images.some(img => img.includes('cdn.dsmcdn.com')));
 
-        const products = allProducts.filter(p => p.images.some(img => img.includes('cdn.dsmcdn.com')));
+        console.log(`   İşlenecek Parent Ürün: ${targetProducts.length}`);
 
-        console.log(`   İşlenecek Ürün Sayısı: ${products.length}`);
-        let migrated = 0;
-
-        for (const p of products) {
-            process.stdout.write(`   [${migrated + 1}/${products.length}] ${p.name.substring(0, 30)}... `);
-            const success = await migrateProductImages(p.id);
-            if (success) {
-                console.log('✅');
-                migrated++;
-            } else {
-                console.log('❌');
-            }
+        for (const p of targetProducts) {
+            await migrateProductImages(p.id);
         }
-        console.log(`\n✅ Görsel Taşıma Tamamlandı: ${migrated} ürün güncellendi.`);
+
+        // 2. Varyant görsellerini taşı (Bunu migration fonksiyonuna eklememiz lazım)
+        // Şimdilik sadece parent migrasyonu var, variant migrasyonunu da eklemeliyiz.
+        console.log('⚠️ Varyant görselleri için migration script güncellenmeli.');
     }
 }
 

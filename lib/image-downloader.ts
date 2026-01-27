@@ -23,38 +23,63 @@ export async function downloadImage(url: string, savePath: string): Promise<bool
 export async function migrateProductImages(productId: string) {
     const product = await prisma.product.findUnique({
         where: { id: productId },
-        select: { id: true, images: true, slug: true }
+        include: { variants: true } // Varyantları da al
     });
 
-    if (!product || !product.images.length) return false;
+    if (!product) return false;
 
-    // Check if images are already migrated (local paths)
-    if (product.images[0].startsWith('/products/')) return true;
+    let totalSuccess = true;
+    const baseDir = path.join(process.cwd(), 'public', 'products', product.slug);
 
-    const newImages: string[] = [];
-    const imageDir = path.join(process.cwd(), 'public', 'products', product.slug);
+    // 1. Parent Görselleri Taşı
+    if (product.images.length > 0 && !product.images[0].startsWith('/products/')) {
+        const newImages: string[] = [];
+        for (let i = 0; i < product.images.length; i++) {
+            const url = product.images[i];
+            const ext = path.extname(url) || '.jpg';
+            const fileName = `default-${i + 1}${ext}`;
+            const savePath = path.join(baseDir, fileName);
 
-    for (let i = 0; i < product.images.length; i++) {
-        const url = product.images[i];
-        const ext = path.extname(url) || '.jpg';
-        const fileName = `${i + 1}${ext}`;
-        const savePath = path.join(imageDir, fileName);
+            if (await downloadImage(url, savePath)) {
+                newImages.push(`/products/${product.slug}/${fileName}`);
+            } else {
+                newImages.push(url);
+                totalSuccess = false;
+            }
+        }
+        await prisma.product.update({
+            where: { id: productId },
+            data: { images: newImages }
+        });
+    }
 
-        const success = await downloadImage(url, savePath);
+    // 2. Varyant Görselleri Taşı
+    for (const variant of product.variants) {
+        if (variant.images.length > 0 && !variant.images[0].startsWith('/products/')) {
+            const newImages: string[] = [];
 
-        if (success) {
-            newImages.push(`/products/${product.slug}/${fileName}`);
-        } else {
-            // Keep original URL if download fails
-            newImages.push(url);
+            // Varyant için özel klasör veya isimlendirme: {slug}/{sku}-1.jpg
+            for (let i = 0; i < variant.images.length; i++) {
+                const url = variant.images[i];
+                const ext = path.extname(url) || '.jpg';
+                // SKU veya ID kullanarak benzersiz yap
+                const fileName = `${variant.sku}-${i + 1}${ext}`;
+                const savePath = path.join(baseDir, fileName);
+
+                if (await downloadImage(url, savePath)) {
+                    newImages.push(`/products/${product.slug}/${fileName}`);
+                } else {
+                    newImages.push(url);
+                    totalSuccess = false;
+                }
+            }
+
+            await prisma.productVariant.update({
+                where: { id: variant.id },
+                data: { images: newImages }
+            });
         }
     }
 
-    // Update product with local paths
-    await prisma.product.update({
-        where: { id: productId },
-        data: { images: newImages }
-    });
-
-    return true;
+    return totalSuccess;
 }

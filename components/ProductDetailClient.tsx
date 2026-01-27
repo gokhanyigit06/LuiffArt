@@ -14,7 +14,8 @@ interface ProductDetailProps {
         variants: (Omit<ProductVariant, 'priceTRY' | 'priceUSD'> & {
             priceTRY: number;
             priceUSD: number;
-            desi?: number | null
+            desi?: number | null;
+            images: string[];
         })[];
         category: Category | null;
     };
@@ -67,6 +68,14 @@ export default function ProductDetailClient({ product }: ProductDetailProps) {
         openCart();
     };
 
+    // Variant image selection
+    const displayedImage = useMemo(() => {
+        if (currentVariant && currentVariant.images && currentVariant.images.length > 0) {
+            return currentVariant.images[0];
+        }
+        return product.images[0] || 'https://placehold.co/800x1000';
+    }, [currentVariant, product.images]);
+
     const price = region === 'TR' ? currentVariant?.priceTRY : currentVariant?.priceUSD;
     const symbol = region === 'TR' ? '₺' : '$';
 
@@ -81,13 +90,14 @@ export default function ProductDetailClient({ product }: ProductDetailProps) {
                     <div className="lg:col-span-7 relative">
                         <div className="sticky top-28 h-[calc(100vh-160px)] min-h-[500px] w-full bg-[#f0f0f0] overflow-hidden">
                             <motion.div
+                                key={displayedImage} // Re-animate on image change
                                 initial={{ opacity: 0, scale: 0.95 }}
                                 animate={{ opacity: 1, scale: 1 }}
                                 transition={{ duration: 0.8 }}
                                 className="w-full h-full relative"
                             >
                                 <Image
-                                    src={product.images[0] || 'https://placehold.co/800x1000'}
+                                    src={displayedImage}
                                     alt={product.name}
                                     fill
                                     priority

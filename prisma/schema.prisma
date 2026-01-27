@@ -125,6 +125,8 @@ model ProductVariant {
   productId   String
   product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   
+  images      String[] // Varyanta özel görseller
+  
   size        String   // Örn: 50x70
   material    String   // Örn: Çerçeveli, Kanvas, Poster
   sku         String   @unique // Stok kodu (Navlungo için önemli)
