@@ -319,151 +319,190 @@ export default function ProductsPage() {
     ];
 
     return (
-        <div>
-            <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between' }}>
+        <div style={{ margin: '-24px', backgroundColor: '#fff' }}>
+            <div style={{
+                padding: '3rem 4rem 2rem',
+                borderBottom: '2px solid #000',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'flex-end'
+            }}>
                 <div>
-                    <h1 style={{ fontSize: 24, fontWeight: 600, marginBottom: 4, fontFamily: 'var(--font-italiana)' }}>Products</h1>
-                    <p style={{ color: '#8c8c8c', fontSize: 14, margin: 0 }}>Manage your store products and inventory</p>
+                    <span style={{
+                        fontSize: '0.75rem',
+                        fontWeight: 800,
+                        letterSpacing: '0.4em',
+                        color: '#000',
+                        textTransform: 'uppercase',
+                        display: 'block',
+                        marginBottom: '1rem'
+                    }}>
+                        Product Management
+                    </span>
+                    <h1 className="font-italiana" style={{
+                        fontSize: 'clamp(3rem, 5vw, 5rem)',
+                        fontWeight: 400,
+                        marginBottom: '0.5rem',
+                        lineHeight: 0.9,
+                        letterSpacing: '-0.02em'
+                    }}>
+                        PRODUCTS
+                    </h1>
+                    <p style={{ color: '#666', fontSize: 14, margin: 0, letterSpacing: '0.05em' }}>
+                        Manage your store products and inventory
+                    </p>
                 </div>
                 <Button
                     type="primary"
                     icon={<PlusOutlined />}
                     onClick={() => showModal()}
+                    style={{
+                        height: '48px',
+                        padding: '0 32px',
+                        backgroundColor: '#000',
+                        border: 'none',
+                        fontWeight: 700,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.1em',
+                        fontSize: '11px'
+                    }}
                 >
                     Add Product
                 </Button>
             </div>
+            <div style={{ padding: '2rem 4rem' }}>
 
-            <Card>
-                <Table
-                    columns={columns}
-                    dataSource={products}
-                    rowKey="id"
-                    loading={loading}
-                    pagination={{ pageSize: 10 }}
-                    locale={{
-                        emptyText: (
-                            <div style={{ padding: '40px 0', textAlign: 'center' }}>
-                                <div style={{ fontSize: 48, marginBottom: 16 }}>🎨</div>
-                                <h3 style={{ fontFamily: 'var(--font-italiana)', fontSize: 20, marginBottom: 8 }}>
-                                    Your Gallery Awaits
-                                </h3>
-                                <p style={{ color: '#8c8c8c', marginBottom: 24 }}>
-                                    Add your first masterpiece to begin showcasing your art collection
-                                </p>
-                                <Button type="primary" icon={<PlusOutlined />} onClick={() => showModal()}>
-                                    Add First Product
-                                </Button>
-                            </div>
-                        )
-                    }}
-                />
-            </Card>
+                <Card>
+                    <Table
+                        columns={columns}
+                        dataSource={products}
+                        rowKey="id"
+                        loading={loading}
+                        pagination={{ pageSize: 10 }}
+                        locale={{
+                            emptyText: (
+                                <div style={{ padding: '40px 0', textAlign: 'center' }}>
+                                    <div style={{ fontSize: 48, marginBottom: 16 }}>🎨</div>
+                                    <h3 style={{ fontFamily: 'var(--font-italiana)', fontSize: 20, marginBottom: 8 }}>
+                                        Your Gallery Awaits
+                                    </h3>
+                                    <p style={{ color: '#8c8c8c', marginBottom: 24 }}>
+                                        Add your first masterpiece to begin showcasing your art collection
+                                    </p>
+                                    <Button type="primary" icon={<PlusOutlined />} onClick={() => showModal()}>
+                                        Add First Product
+                                    </Button>
+                                </div>
+                            )
+                        }}
+                    />
+                </Card>
 
-            <Drawer
-                title={editingProduct ? 'Edit Product' : 'New Product'}
-                open={isModalOpen}
-                onClose={handleCancel}
-                size="large"
-                extra={
-                    <Space>
-                        <Button onClick={handleCancel}>Cancel</Button>
-                        <Button type="primary" onClick={() => form.submit()}>
-                            {editingProduct ? 'Update' : 'Save'}
-                        </Button>
-                    </Space>
-                }
-            >
-                <Form
-                    form={form}
-                    layout="vertical"
-                    onFinish={handleSubmit}
-                    initialValues={{ isActive: true, trackQuantity: true }}
+                <Drawer
+                    title={editingProduct ? 'Edit Product' : 'New Product'}
+                    open={isModalOpen}
+                    onClose={handleCancel}
+                    size="large"
+                    extra={
+                        <Space>
+                            <Button onClick={handleCancel}>Cancel</Button>
+                            <Button type="primary" onClick={() => form.submit()}>
+                                {editingProduct ? 'Update' : 'Save'}
+                            </Button>
+                        </Space>
+                    }
                 >
-                    <Tabs
-                        defaultActiveKey="1"
-                        items={[
-                            {
-                                key: '1',
-                                label: 'Basic Info',
-                                children: (
-                                    <>
-                                        <Form.Item label="Product Name" name="name" rules={[{ required: true, message: 'Please enter product name' }]}>
-                                            <Input onChange={handleNameChange} placeholder="e.g. Abstract Sunset Canvas" />
-                                        </Form.Item>
-                                        <Form.Item label="Description" name="description">
-                                            <Input.TextArea rows={4} placeholder="Describe your artwork..." />
-                                        </Form.Item>
-                                        <Form.Item label="Image URL" name="imageUrl" rules={[{ required: true, message: 'Please enter image URL' }]}>
-                                            <Input placeholder="https://images.unsplash.com/photo-..." />
-                                        </Form.Item>
+                    <Form
+                        form={form}
+                        layout="vertical"
+                        onFinish={handleSubmit}
+                        initialValues={{ isActive: true, trackQuantity: true }}
+                    >
+                        <Tabs
+                            defaultActiveKey="1"
+                            items={[
+                                {
+                                    key: '1',
+                                    label: 'Basic Info',
+                                    children: (
+                                        <>
+                                            <Form.Item label="Product Name" name="name" rules={[{ required: true, message: 'Please enter product name' }]}>
+                                                <Input onChange={handleNameChange} placeholder="e.g. Abstract Sunset Canvas" />
+                                            </Form.Item>
+                                            <Form.Item label="Description" name="description">
+                                                <Input.TextArea rows={4} placeholder="Describe your artwork..." />
+                                            </Form.Item>
+                                            <Form.Item label="Image URL" name="imageUrl" rules={[{ required: true, message: 'Please enter image URL' }]}>
+                                                <Input placeholder="https://images.unsplash.com/photo-..." />
+                                            </Form.Item>
 
-                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-                                            <Form.Item label="Price (TL)" name="priceTRY" rules={[{ required: true, message: 'Required' }]}>
-                                                <InputNumber prefix="₺" style={{ width: '100%' }} precision={2} min={0} placeholder="0.00" />
-                                            </Form.Item>
-                                            <Form.Item label="Price (USD)" name="priceUSD" rules={[{ required: true, message: 'Required' }]}>
-                                                <InputNumber prefix="$" style={{ width: '100%' }} precision={2} min={0} placeholder="0.00" />
-                                            </Form.Item>
-                                        </div>
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                                                <Form.Item label="Price (TL)" name="priceTRY" rules={[{ required: true, message: 'Required' }]}>
+                                                    <InputNumber prefix="₺" style={{ width: '100%' }} precision={2} min={0} placeholder="0.00" />
+                                                </Form.Item>
+                                                <Form.Item label="Price (USD)" name="priceUSD" rules={[{ required: true, message: 'Required' }]}>
+                                                    <InputNumber prefix="$" style={{ width: '100%' }} precision={2} min={0} placeholder="0.00" />
+                                                </Form.Item>
+                                            </div>
 
-                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-                                            <Form.Item label="Stock Quantity" name="stock" initialValue={0}>
-                                                <InputNumber style={{ width: '100%' }} min={0} placeholder="0" />
-                                            </Form.Item>
-                                            <Form.Item label="Category" name="categoryId">
-                                                <Select
-                                                    allowClear
-                                                    placeholder="Select category"
-                                                    options={categories.map((cat) => ({
-                                                        label: cat.name,
-                                                        value: cat.id,
-                                                    }))}
-                                                />
-                                            </Form.Item>
-                                        </div>
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                                                <Form.Item label="Stock Quantity" name="stock" initialValue={0}>
+                                                    <InputNumber style={{ width: '100%' }} min={0} placeholder="0" />
+                                                </Form.Item>
+                                                <Form.Item label="Category" name="categoryId">
+                                                    <Select
+                                                        allowClear
+                                                        placeholder="Select category"
+                                                        options={categories.map((cat) => ({
+                                                            label: cat.name,
+                                                            value: cat.id,
+                                                        }))}
+                                                    />
+                                                </Form.Item>
+                                            </div>
 
-                                        <Form.Item label="Status" name="isActive">
-                                            <Select>
-                                                <Select.Option value={true}>Active</Select.Option>
-                                                <Select.Option value={false}>Draft</Select.Option>
-                                            </Select>
-                                        </Form.Item>
-                                    </>
-                                )
-                            },
-                            {
-                                key: '2',
-                                label: 'Advanced Pricing',
-                                children: (
-                                    <>
-                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-                                            <Form.Item label="Compare Price (TL)" name="compareAtPriceTRY" tooltip="Original price before discount">
+                                            <Form.Item label="Status" name="isActive">
+                                                <Select>
+                                                    <Select.Option value={true}>Active</Select.Option>
+                                                    <Select.Option value={false}>Draft</Select.Option>
+                                                </Select>
+                                            </Form.Item>
+                                        </>
+                                    )
+                                },
+                                {
+                                    key: '2',
+                                    label: 'Advanced Pricing',
+                                    children: (
+                                        <>
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                                                <Form.Item label="Compare Price (TL)" name="compareAtPriceTRY" tooltip="Original price before discount">
+                                                    <InputNumber prefix="₺" style={{ width: '100%' }} precision={2} min={0} />
+                                                </Form.Item>
+                                                <Form.Item label="Compare Price (USD)" name="compareAtPriceUSD">
+                                                    <InputNumber prefix="$" style={{ width: '100%' }} precision={2} min={0} />
+                                                </Form.Item>
+                                            </div>
+                                            <Form.Item label="Cost Price (TL)" name="costPriceTRY" tooltip="Your cost - customers won't see this">
                                                 <InputNumber prefix="₺" style={{ width: '100%' }} precision={2} min={0} />
                                             </Form.Item>
-                                            <Form.Item label="Compare Price (USD)" name="compareAtPriceUSD">
-                                                <InputNumber prefix="$" style={{ width: '100%' }} precision={2} min={0} />
+                                            <Form.Item label="SKU" name="sku" tooltip="Stock Keeping Unit">
+                                                <Input placeholder="AUTO-GENERATED" />
                                             </Form.Item>
-                                        </div>
-                                        <Form.Item label="Cost Price (TL)" name="costPriceTRY" tooltip="Your cost - customers won't see this">
-                                            <InputNumber prefix="₺" style={{ width: '100%' }} precision={2} min={0} />
-                                        </Form.Item>
-                                        <Form.Item label="SKU" name="sku" tooltip="Stock Keeping Unit">
-                                            <Input placeholder="AUTO-GENERATED" />
-                                        </Form.Item>
-                                        <Form.Item label="Barcode" name="barcode">
-                                            <Input placeholder="ISBN, UPC, GTIN..." />
-                                        </Form.Item>
-                                        <Form.Item label="Track Inventory" name="trackQuantity" valuePropName="checked">
-                                            <Switch defaultChecked />
-                                        </Form.Item>
-                                    </>
-                                )
-                            }
-                        ]}
-                    />
-                </Form>
-            </Drawer>
+                                            <Form.Item label="Barcode" name="barcode">
+                                                <Input placeholder="ISBN, UPC, GTIN..." />
+                                            </Form.Item>
+                                            <Form.Item label="Track Inventory" name="trackQuantity" valuePropName="checked">
+                                                <Switch defaultChecked />
+                                            </Form.Item>
+                                        </>
+                                    )
+                                }
+                            ]}
+                        />
+                    </Form>
+                </Drawer>
+            </div>
         </div>
     );
 }

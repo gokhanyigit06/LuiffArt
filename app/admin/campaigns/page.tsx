@@ -164,137 +164,190 @@ export default function AdminCampaignsPage() {
     ];
 
     return (
-        <div style={{ padding: '0 20px' }}>
-            <div style={{ marginBottom: 32, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
-                    <Title level={2} style={{ margin: 0, fontFamily: 'var(--font-italiana)' }}>Promotions & Campaigns</Title>
-                    <Text type="secondary">Manage discount codes and marketing events</Text>
-                </div>
+        <div style={{ margin: '-24px', backgroundColor: '#fff' }}>
+            <div style={{
+                padding: '3rem 4rem 2rem',
+                borderBottom: '2px solid #000'
+            }}>
+                <span style={{
+                    fontSize: '0.75rem',
+                    fontWeight: 800,
+                    letterSpacing: '0.4em',
+                    color: '#000',
+                    textTransform: 'uppercase',
+                    display: 'block',
+                    marginBottom: '1rem'
+                }}>
+                    Marketing & Promotions
+                </span>
+                <h1 className="font-italiana" style={{
+                    fontSize: 'clamp(3rem, 5vw, 5rem)',
+                    fontWeight: 400,
+                    marginBottom: '0.5rem',
+                    lineHeight: 0.9,
+                    letterSpacing: '-0.02em'
+                }}>
+                    CAMPAIGNS
+                </h1>
+                <p style={{ color: '#666', fontSize: 14, margin: 0, letterSpacing: '0.05em' }}>
+                    Manage discount codes and marketing events
+                </p>
             </div>
+            <div style={{ padding: '2rem 4rem' }}>
 
-            <Tabs
-                defaultActiveKey="1"
-                items={[
-                    {
-                        key: '1',
-                        label: <span><PercentageOutlined /> Coupons</span>,
-                        children: (
-                            <Card style={{ borderRadius: 12 }}>
-                                <div style={{ marginBottom: 16, textAlign: 'right' }}>
-                                    <Button type="primary" icon={<PlusOutlined />} onClick={() => setCouponModalVisible(true)} className="!bg-black">
-                                        Create Coupon
-                                    </Button>
-                                </div>
-                                <Table columns={couponColumns} dataSource={coupons} rowKey="id" loading={loading} />
-                            </Card>
-                        )
-                    },
-                    {
-                        key: '2',
-                        label: <span><NotificationOutlined /> Campaigns</span>,
-                        children: (
-                            <Card style={{ borderRadius: 12 }}>
-                                <div style={{ marginBottom: 16, textAlign: 'right' }}>
-                                    <Button type="primary" icon={<PlusOutlined />} onClick={() => setCampaignModalVisible(true)} className="!bg-black">
-                                        Create Campaign
-                                    </Button>
-                                </div>
-                                <Table columns={campaignColumns} dataSource={campaigns} rowKey="id" loading={loading} />
-                            </Card>
-                        )
-                    }
-                ]}
-            />
+                <Tabs
+                    defaultActiveKey="1"
+                    items={[
+                        {
+                            key: '1',
+                            label: <span><PercentageOutlined /> Coupons</span>,
+                            children: (
+                                <Card style={{ border: 'none', boxShadow: 'none' }}>
+                                    <div style={{ marginBottom: 16, textAlign: 'right' }}>
+                                        <Button
+                                            type="primary"
+                                            icon={<PlusOutlined />}
+                                            onClick={() => setCouponModalVisible(true)}
+                                            style={{
+                                                height: '48px',
+                                                padding: '0 32px',
+                                                backgroundColor: '#000',
+                                                border: 'none',
+                                                fontWeight: 700,
+                                                textTransform: 'uppercase',
+                                                letterSpacing: '0.1em',
+                                                fontSize: '11px'
+                                            }}
+                                        >
+                                            Create Coupon
+                                        </Button>
+                                    </div>
+                                    <Table columns={couponColumns} dataSource={coupons} rowKey="id" loading={loading} />
+                                </Card>
+                            )
+                        },
+                        {
+                            key: '2',
+                            label: <span><NotificationOutlined /> Campaigns</span>,
+                            children: (
+                                <Card style={{ border: 'none', boxShadow: 'none' }}>
+                                    <div style={{ marginBottom: 16, textAlign: 'right' }}>
+                                        <Button
+                                            type="primary"
+                                            icon={<PlusOutlined />}
+                                            onClick={() => setCampaignModalVisible(true)}
+                                            style={{
+                                                height: '48px',
+                                                padding: '0 32px',
+                                                backgroundColor: '#000',
+                                                border: 'none',
+                                                fontWeight: 700,
+                                                textTransform: 'uppercase',
+                                                letterSpacing: '0.1em',
+                                                fontSize: '11px'
+                                            }}
+                                        >
+                                            Create Campaign
+                                        </Button>
+                                    </div>
+                                    <Table columns={campaignColumns} dataSource={campaigns} rowKey="id" loading={loading} />
+                                </Card>
+                            )
+                        }
+                    ]}
+                />
 
-            {/* Create Coupon Modal */}
-            <Modal
-                title="Create New Coupon"
-                open={couponModalVisible}
-                onCancel={() => setCouponModalVisible(false)}
-                footer={null}
-                width={600}
-            >
-                <Form form={form} layout="vertical" onFinish={handleCreateCoupon}>
-                    <Row gutter={16}>
-                        <Col span={12}>
-                            <Form.Item name="code" label="Coupon Code" rules={[{ required: true }]}>
-                                <Input placeholder="NEWYEAR2024" style={{ textTransform: 'uppercase' }} />
-                            </Form.Item>
-                        </Col>
-                        <Col span={12}>
-                            <Form.Item name="type" label="Type" initialValue="PERCENTAGE">
-                                <Select>
-                                    <Select.Option value="PERCENTAGE">Percentage (%)</Select.Option>
-                                    <Select.Option value="FIXED_AMOUNT">Fixed Amount (₺/$)</Select.Option>
-                                </Select>
-                            </Form.Item>
-                        </Col>
-                        <Col span={12}>
-                            <Form.Item name="value" label="Value" rules={[{ required: true }]}>
-                                <InputNumber style={{ width: '100%' }} min={0} />
-                            </Form.Item>
-                        </Col>
-                        <Col span={12}>
-                            <Form.Item name="usageLimit" label="Total Usage Limit">
-                                <InputNumber style={{ width: '100%' }} min={1} placeholder="Unlimited" />
-                            </Form.Item>
-                        </Col>
-                        <Col span={24}>
-                            <Form.Item name="dates" label="Validity Period">
-                                <RangePicker style={{ width: '100%' }} showTime />
-                            </Form.Item>
-                        </Col>
-                    </Row>
-                    <div style={{ textAlign: 'right', marginTop: 16 }}>
-                        <Button onClick={() => setCouponModalVisible(false)} style={{ marginRight: 8 }}>Cancel</Button>
-                        <Button type="primary" htmlType="submit" className="!bg-black">Save Coupon</Button>
-                    </div>
-                </Form>
-            </Modal>
+                {/* Create Coupon Modal */}
+                <Modal
+                    title="Create New Coupon"
+                    open={couponModalVisible}
+                    onCancel={() => setCouponModalVisible(false)}
+                    footer={null}
+                    width={600}
+                >
+                    <Form form={form} layout="vertical" onFinish={handleCreateCoupon}>
+                        <Row gutter={16}>
+                            <Col span={12}>
+                                <Form.Item name="code" label="Coupon Code" rules={[{ required: true }]}>
+                                    <Input placeholder="NEWYEAR2024" style={{ textTransform: 'uppercase' }} />
+                                </Form.Item>
+                            </Col>
+                            <Col span={12}>
+                                <Form.Item name="type" label="Type" initialValue="PERCENTAGE">
+                                    <Select>
+                                        <Select.Option value="PERCENTAGE">Percentage (%)</Select.Option>
+                                        <Select.Option value="FIXED_AMOUNT">Fixed Amount (₺/$)</Select.Option>
+                                    </Select>
+                                </Form.Item>
+                            </Col>
+                            <Col span={12}>
+                                <Form.Item name="value" label="Value" rules={[{ required: true }]}>
+                                    <InputNumber style={{ width: '100%' }} min={0} />
+                                </Form.Item>
+                            </Col>
+                            <Col span={12}>
+                                <Form.Item name="usageLimit" label="Total Usage Limit">
+                                    <InputNumber style={{ width: '100%' }} min={1} placeholder="Unlimited" />
+                                </Form.Item>
+                            </Col>
+                            <Col span={24}>
+                                <Form.Item name="dates" label="Validity Period">
+                                    <RangePicker style={{ width: '100%' }} showTime />
+                                </Form.Item>
+                            </Col>
+                        </Row>
+                        <div style={{ textAlign: 'right', marginTop: 16 }}>
+                            <Button onClick={() => setCouponModalVisible(false)} style={{ marginRight: 8 }}>Cancel</Button>
+                            <Button type="primary" htmlType="submit" className="!bg-black">Save Coupon</Button>
+                        </div>
+                    </Form>
+                </Modal>
 
-            {/* Create Campaign Modal */}
-            <Modal
-                title="Create Marketing Campaign"
-                open={campaignModalVisible}
-                onCancel={() => setCampaignModalVisible(false)}
-                footer={null}
-                width={700}
-            >
-                <Form form={form} layout="vertical" onFinish={handleCreateCampaign}>
-                    <Form.Item name="title" label="Campaign Title" rules={[{ required: true }]}>
-                        <Input placeholder="Bahar Koleksiyonu İndirimi" />
-                    </Form.Item>
-                    <Form.Item name="slug" label="Slug (URL)" rules={[{ required: true }]}>
-                        <Input placeholder="bahar-indirimi" addonBefore="luiff.art/campaign/" />
-                    </Form.Item>
-                    <Form.Item name="bannerUrl" label="Banner Image URL">
-                        <Input placeholder="https://..." />
-                    </Form.Item>
-                    <Form.Item name="description" label="Campaign Description">
-                        <Input.TextArea rows={4} placeholder="Describe the campaign details..." />
-                    </Form.Item>
-                    <Row gutter={16}>
-                        <Col span={12}>
-                            <Form.Item name="couponId" label="Link Coupon (Optional)">
-                                <Select placeholder="Select a coupon" allowClear>
-                                    {coupons.map((c: any) => (
-                                        <Select.Option key={c.id} value={c.id}>{c.code} ({c.value}{c.type === 'PERCENTAGE' ? '%' : '₺'})</Select.Option>
-                                    ))}
-                                </Select>
-                            </Form.Item>
-                        </Col>
-                        <Col span={12}>
-                            <Form.Item name="dates" label="Campaign Period">
-                                <RangePicker style={{ width: '100%' }} />
-                            </Form.Item>
-                        </Col>
-                    </Row>
-                    <div style={{ textAlign: 'right', marginTop: 16 }}>
-                        <Button onClick={() => setCampaignModalVisible(false)} style={{ marginRight: 8 }}>Cancel</Button>
-                        <Button type="primary" htmlType="submit" className="!bg-black">Launch Campaign</Button>
-                    </div>
-                </Form>
-            </Modal>
+                {/* Create Campaign Modal */}
+                <Modal
+                    title="Create Marketing Campaign"
+                    open={campaignModalVisible}
+                    onCancel={() => setCampaignModalVisible(false)}
+                    footer={null}
+                    width={700}
+                >
+                    <Form form={form} layout="vertical" onFinish={handleCreateCampaign}>
+                        <Form.Item name="title" label="Campaign Title" rules={[{ required: true }]}>
+                            <Input placeholder="Bahar Koleksiyonu İndirimi" />
+                        </Form.Item>
+                        <Form.Item name="slug" label="Slug (URL)" rules={[{ required: true }]}>
+                            <Input placeholder="bahar-indirimi" addonBefore="luiff.art/campaign/" />
+                        </Form.Item>
+                        <Form.Item name="bannerUrl" label="Banner Image URL">
+                            <Input placeholder="https://..." />
+                        </Form.Item>
+                        <Form.Item name="description" label="Campaign Description">
+                            <Input.TextArea rows={4} placeholder="Describe the campaign details..." />
+                        </Form.Item>
+                        <Row gutter={16}>
+                            <Col span={12}>
+                                <Form.Item name="couponId" label="Link Coupon (Optional)">
+                                    <Select placeholder="Select a coupon" allowClear>
+                                        {coupons.map((c: any) => (
+                                            <Select.Option key={c.id} value={c.id}>{c.code} ({c.value}{c.type === 'PERCENTAGE' ? '%' : '₺'})</Select.Option>
+                                        ))}
+                                    </Select>
+                                </Form.Item>
+                            </Col>
+                            <Col span={12}>
+                                <Form.Item name="dates" label="Campaign Period">
+                                    <RangePicker style={{ width: '100%' }} />
+                                </Form.Item>
+                            </Col>
+                        </Row>
+                        <div style={{ textAlign: 'right', marginTop: 16 }}>
+                            <Button onClick={() => setCampaignModalVisible(false)} style={{ marginRight: 8 }}>Cancel</Button>
+                            <Button type="primary" htmlType="submit" className="!bg-black">Launch Campaign</Button>
+                        </div>
+                    </Form>
+                </Modal>
+            </div>
         </div>
     );
 }
+

@@ -141,36 +141,80 @@ export default function AdminCustomersPage() {
     ];
 
     return (
-        <div>
-            <div style={{ marginBottom: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ margin: '-24px', backgroundColor: '#fff' }}>
+            <div style={{
+                padding: '3rem 4rem 2rem',
+                borderBottom: '2px solid #000',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'flex-end'
+            }}>
                 <div>
-                    <Title level={2} style={{ margin: 0, fontFamily: 'var(--font-italiana)' }}>Customers</Title>
-                    <Text type="secondary">Manage your customer relationships and view performance</Text>
+                    <span style={{
+                        fontSize: '0.75rem',
+                        fontWeight: 800,
+                        letterSpacing: '0.4em',
+                        color: '#000',
+                        textTransform: 'uppercase',
+                        display: 'block',
+                        marginBottom: '1rem'
+                    }}>
+                        Customer Management
+                    </span>
+                    <h1 className="font-italiana" style={{
+                        fontSize: 'clamp(3rem, 5vw, 5rem)',
+                        fontWeight: 400,
+                        marginBottom: '0.5rem',
+                        lineHeight: 0.9,
+                        letterSpacing: '-0.02em'
+                    }}>
+                        CUSTOMERS
+                    </h1>
+                    <p style={{ color: '#666', fontSize: 14, margin: 0, letterSpacing: '0.05em' }}>
+                        Manage your customer relationships and view performance
+                    </p>
                 </div>
-                <Button icon={<DownloadOutlined />} onClick={handleExport} disabled={customers.length === 0}>
+                <Button
+                    icon={<DownloadOutlined />}
+                    onClick={handleExport}
+                    disabled={customers.length === 0}
+                    style={{
+                        height: '48px',
+                        padding: '0 32px',
+                        backgroundColor: '#000',
+                        color: '#fff',
+                        border: 'none',
+                        fontWeight: 700,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.1em',
+                        fontSize: '11px'
+                    }}
+                >
                     Export List
                 </Button>
             </div>
+            <div style={{ padding: '2rem 4rem' }}>
 
-            <Card style={{ borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
-                <div style={{ marginBottom: 16 }}>
-                    <Input
-                        placeholder="Search by name or email..."
-                        prefix={<SearchOutlined />}
-                        style={{ maxWidth: 400 }}
-                        value={searchText}
-                        onChange={e => setSearchText(e.target.value)}
+                <Card style={{ border: 'none', boxShadow: 'none' }}>
+                    <div style={{ marginBottom: 16 }}>
+                        <Input
+                            placeholder="Search by name or email..."
+                            prefix={<SearchOutlined />}
+                            style={{ maxWidth: 400 }}
+                            value={searchText}
+                            onChange={e => setSearchText(e.target.value)}
+                        />
+                    </div>
+                    <Table
+                        columns={columns}
+                        dataSource={filteredCustomers}
+                        rowKey="id"
+                        loading={loading}
+                        pagination={{ pageSize: 10 }}
+                        locale={{ emptyText: 'No customers found' }}
                     />
-                </div>
-                <Table
-                    columns={columns}
-                    dataSource={filteredCustomers}
-                    rowKey="id"
-                    loading={loading}
-                    pagination={{ pageSize: 10 }}
-                    locale={{ emptyText: 'No customers found' }}
-                />
-            </Card>
+                </Card>
+            </div>
         </div>
     );
 }

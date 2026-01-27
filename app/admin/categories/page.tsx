@@ -189,63 +189,105 @@ export default function CategoriesPage() {
     ];
 
     return (
-        <div>
-            <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between' }}>
-                <h1 style={{ fontSize: 24, fontWeight: 'bold' }}>Kategori Yönetimi</h1>
+        <div style={{ margin: '-24px', backgroundColor: '#fff' }}>
+            <div style={{
+                padding: '3rem 4rem 2rem',
+                borderBottom: '2px solid #000',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'flex-end'
+            }}>
+                <div>
+                    <span style={{
+                        fontSize: '0.75rem',
+                        fontWeight: 800,
+                        letterSpacing: '0.4em',
+                        color: '#000',
+                        textTransform: 'uppercase',
+                        display: 'block',
+                        marginBottom: '1rem'
+                    }}>
+                        Category Management
+                    </span>
+                    <h1 className="font-italiana" style={{
+                        fontSize: 'clamp(3rem, 5vw, 5rem)',
+                        fontWeight: 400,
+                        marginBottom: '0.5rem',
+                        lineHeight: 0.9,
+                        letterSpacing: '-0.02em'
+                    }}>
+                        CATEGORIES
+                    </h1>
+                    <p style={{ color: '#666', fontSize: 14, margin: 0, letterSpacing: '0.05em' }}>
+                        Organize your product collections
+                    </p>
+                </div>
                 <Button
                     type="primary"
                     icon={<PlusOutlined />}
                     onClick={() => showModal()}
+                    style={{
+                        height: '48px',
+                        padding: '0 32px',
+                        backgroundColor: '#000',
+                        border: 'none',
+                        fontWeight: 700,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.1em',
+                        fontSize: '11px'
+                    }}
                 >
                     Yeni Kategori Ekle
                 </Button>
             </div>
+            <div style={{ padding: '2rem 4rem' }}>
 
-            <Table
-                columns={columns}
-                dataSource={categories}
-                rowKey="id"
-                loading={loading}
-                pagination={{ pageSize: 10 }}
-            />
+                <Table
+                    columns={columns}
+                    dataSource={categories}
+                    rowKey="id"
+                    loading={loading}
+                    pagination={{ pageSize: 10 }}
+                />
 
-            <Modal
-                title={editingCategory ? 'Kategori Düzenle' : 'Yeni Kategori Ekle'}
-                open={isModalOpen}
-                onCancel={handleCancel}
-                footer={null}
-            >
-                <Form
-                    form={form}
-                    layout="vertical"
-                    onFinish={handleSubmit}
+                <Modal
+                    title={editingCategory ? 'Kategori Düzenle' : 'Yeni Kategori Ekle'}
+                    open={isModalOpen}
+                    onCancel={handleCancel}
+                    footer={null}
                 >
-                    <Form.Item
-                        label="Kategori Adı"
-                        name="name"
-                        rules={[{ required: true, message: 'Kategori adı gerekli' }]}
+                    <Form
+                        form={form}
+                        layout="vertical"
+                        onFinish={handleSubmit}
                     >
-                        <Input onChange={handleNameChange} />
-                    </Form.Item>
+                        <Form.Item
+                            label="Kategori Adı"
+                            name="name"
+                            rules={[{ required: true, message: 'Kategori adı gerekli' }]}
+                        >
+                            <Input onChange={handleNameChange} />
+                        </Form.Item>
 
-                    <Form.Item
-                        label="Slug"
-                        name="slug"
-                        rules={[{ required: true, message: 'Slug gerekli' }]}
-                    >
-                        <Input />
-                    </Form.Item>
+                        <Form.Item
+                            label="Slug"
+                            name="slug"
+                            rules={[{ required: true, message: 'Slug gerekli' }]}
+                        >
+                            <Input />
+                        </Form.Item>
 
-                    <Form.Item>
-                        <Space>
-                            <Button type="primary" htmlType="submit">
-                                {editingCategory ? 'Güncelle' : 'Ekle'}
-                            </Button>
-                            <Button onClick={handleCancel}>İptal</Button>
-                        </Space>
-                    </Form.Item>
-                </Form>
-            </Modal>
+                        <Form.Item>
+                            <Space>
+                                <Button type="primary" htmlType="submit">
+                                    {editingCategory ? 'Güncelle' : 'Ekle'}
+                                </Button>
+                                <Button onClick={handleCancel}>İptal</Button>
+                            </Space>
+                        </Form.Item>
+                    </Form>
+                </Modal>
+            </div>
         </div>
     );
 }

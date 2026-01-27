@@ -158,17 +158,52 @@ export default function AdminOrdersPage() {
     ];
 
     return (
-        <div>
-            <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ margin: '-24px', backgroundColor: '#fff' }}>
+            <div style={{
+                padding: '3rem 4rem 2rem',
+                borderBottom: '2px solid #000',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'flex-end'
+            }}>
                 <div>
-                    <h1 style={{ fontSize: 24, fontWeight: 600, marginBottom: 4, fontFamily: 'var(--font-italiana)' }}>Orders</h1>
-                    <p style={{ color: '#8c8c8c', fontSize: 14, margin: 0 }}>Manage and track your store orders</p>
+                    <span style={{
+                        fontSize: '0.75rem',
+                        fontWeight: 800,
+                        letterSpacing: '0.4em',
+                        color: '#000',
+                        textTransform: 'uppercase',
+                        display: 'block',
+                        marginBottom: '1rem'
+                    }}>
+                        Order Management
+                    </span>
+                    <h1 className="font-italiana" style={{
+                        fontSize: 'clamp(3rem, 5vw, 5rem)',
+                        fontWeight: 400,
+                        marginBottom: '0.5rem',
+                        lineHeight: 0.9,
+                        letterSpacing: '-0.02em'
+                    }}>
+                        ORDERS
+                    </h1>
+                    <p style={{ color: '#666', fontSize: 14, margin: 0, letterSpacing: '0.05em' }}>
+                        Manage and track your store orders
+                    </p>
                 </div>
-                <div style={{ display: 'flex', gap: 8 }}>
+                <div style={{ display: 'flex', gap: 12 }}>
                     <Button
                         icon={<DownloadOutlined />}
                         onClick={handleExport}
                         disabled={orders.length === 0}
+                        style={{
+                            height: '48px',
+                            padding: '0 24px',
+                            fontWeight: 600,
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.1em',
+                            fontSize: '11px'
+                        }}
                     >
                         Export
                     </Button>
@@ -176,41 +211,59 @@ export default function AdminOrdersPage() {
                         type="primary"
                         icon={<PlusOutlined />}
                         onClick={() => setIsDrawerOpen(true)}
+                        style={{
+                            height: '48px',
+                            padding: '0 32px',
+                            backgroundColor: '#000',
+                            border: 'none',
+                            fontWeight: 700,
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.1em',
+                            fontSize: '11px'
+                        }}
                     >
                         Create Order
                     </Button>
                 </div>
             </div>
+            <div style={{ padding: '2rem 4rem' }}>
 
-            <Card>
-                <div style={{ marginBottom: 16 }}>
-                    <Input
-                        placeholder="Search orders..."
-                        prefix={<SearchOutlined />}
-                        style={{ maxWidth: 400 }}
+                <Card>
+                    <div style={{ marginBottom: 16 }}>
+                        <Input
+                            placeholder="Search orders..."
+                            prefix={<SearchOutlined />}
+                            style={{ maxWidth: 400 }}
+                        />
+                    </div>
+                    <Table
+                        columns={columns}
+                        dataSource={orders}
+                        rowKey="id"
+                        loading={loading}
+                        pagination={{ pageSize: 10 }}
+                        locale={{
+                            emptyText: (
+                                <div style={{ padding: '40px 0', textAlign: 'center' }}>
+                                    <div style={{ fontSize: 48, marginBottom: 16 }}>📦</div>
+                                    <h3 style={{ fontFamily: 'var(--font-italiana)', fontSize: 20, marginBottom: 8 }}>
+                                        No Orders Yet
+                                    </h3>
+                                    <p style={{ color: '#8c8c8c' }}>
+                                        Orders will appear here once customers start purchasing
+                                    </p>
+                                </div>
+                            )
+                        }}
                     />
-                </div>
-                <Table
-                    columns={columns}
-                    dataSource={orders}
-                    rowKey="id"
-                    loading={loading}
-                    pagination={{ pageSize: 10 }}
-                    locale={{
-                        emptyText: (
-                            <div style={{ padding: '40px 0', textAlign: 'center' }}>
-                                <div style={{ fontSize: 48, marginBottom: 16 }}>📦</div>
-                                <h3 style={{ fontFamily: 'var(--font-italiana)', fontSize: 20, marginBottom: 8 }}>
-                                    No Orders Yet
-                                </h3>
-                                <p style={{ color: '#8c8c8c' }}>
-                                    Orders will appear here once customers start purchasing
-                                </p>
-                            </div>
-                        )
-                    }}
+                </Card>
+
+                <CreateOrderDrawer
+                    open={isDrawerOpen}
+                    onClose={() => setIsDrawerOpen(false)}
+                    onSuccess={fetchOrders}
                 />
-            </Card>
+            </div>
 
             <CreateOrderDrawer
                 open={isDrawerOpen}
