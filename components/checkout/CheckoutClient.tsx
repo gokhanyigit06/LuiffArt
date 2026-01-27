@@ -91,6 +91,23 @@ export default function CheckoutClient() {
         // Simulate Payment Processing
         await new Promise(resolve => setTimeout(resolve, 2000));
 
+        // Log Activity - Pulse Analytics
+        fetch('/api/analytics/log', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                eventType: 'PURCHASE',
+                metadata: {
+                    total: finalTotal,
+                    itemsCount: count,
+                    currency: symbol === '₺' ? 'TRY' : 'USD',
+                    email: values.email,
+                    city: values.city,
+                    country: values.country,
+                }
+            })
+        }).catch(err => console.error('Failed to log purchase:', err));
+
         setIsSubmitting(false);
         setIsSuccess(true);
         clearCart();

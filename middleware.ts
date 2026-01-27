@@ -42,31 +42,34 @@ export async function middleware(request: NextRequest) {
         }
     }
 
-    // 1. Check existing cookie
+    // 4. Region & Session ID
+    const SESSION_COOKIE_NAME = 'pulse_session_id'
+    let sessionId = request.cookies.get(SESSION_COOKIE_NAME)?.value
     const existingRegion = request.cookies.get(REGION_COOKIE_NAME)
-    if (existingRegion) {
-        return NextResponse.next()
-    }
 
-    // 2. Detect region from headers
-    let region: RegionCode = 'GLOBAL'
-
-    // Try to detect from Accept-Language header
-    const acceptLanguage = request.headers.get('accept-language')
-    if (acceptLanguage && acceptLanguage.includes('tr')) {
-        region = 'TR'
-    }
-
-    // Note: For more accurate geo-location in production usage (e.g. Hetzner behind Cloudflare/Nginx),
-    // you might check 'x-forwarded-for', 'cf-ipcountry' or similar headers.
-
-    // 3. Set the cookie
     const response = NextResponse.next()
-    response.cookies.set(REGION_COOKIE_NAME, region, {
-        path: '/',
-        maxAge: 60 * 60 * 24 * 365, // 1 year
-        sameSite: 'lax',
-    })
+
+    if (!sessionId) {
+        sessionId = crypto.randomUUID()
+        response.cookies.set(SESSION_COOKIE_NAME, sessionId, {
+            path: '/',
+            maxAge: 60 * 60 * 24 * 30, // 30 days
+            sameSite: 'lax',
+        })
+    }
+
+    if (!existingRegion) {
+        let region: RegionCode = 'GLOBAL'
+        const acceptLanguage = request.headers.get('accept-language')
+        if (acceptLanguage && acceptLanguage.includes('tr')) {
+            region = 'TR'
+        }
+        response.cookies.set(REGION_COOKIE_NAME, region, {
+            path: '/',
+            maxAge: 60 * 60 * 24 * 365, // 1 year
+            sameSite: 'lax',
+        })
+    }
 
     return response
 }

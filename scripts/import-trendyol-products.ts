@@ -180,7 +180,7 @@ async function main() {
                     vendor: firstVariant['Marka'],
                     modelCode,
                     tags: [categoryName, firstVariant['Marka']].filter(Boolean),
-                }
+                } as any
             });
 
             // Varyantları oluştur
@@ -208,7 +208,7 @@ async function main() {
                         stock,
                         trackQuantity: true,
                         images: variantImages // Varyanta özel görseller
-                    }
+                    } as any
                 });
             }
 

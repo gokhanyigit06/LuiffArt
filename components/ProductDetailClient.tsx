@@ -92,6 +92,23 @@ export default function ProductDetailClient({ product }: ProductDetailProps) {
             quantity: 1
         });
 
+        // Log Activity
+        fetch('/api/analytics/log', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                productId: product.id,
+                eventType: 'ADD_TO_CART',
+                metadata: {
+                    variantId: currentVariant.id,
+                    size: currentVariant.size,
+                    material: currentVariant.material,
+                    price: region === 'TR' ? currentVariant.priceTRY : currentVariant.priceUSD,
+                    currency: region === 'TR' ? 'TRY' : 'USD'
+                }
+            })
+        }).catch(err => console.error('Failed to log cart activity:', err));
+
         setIsAdding(false);
         openCart();
     };

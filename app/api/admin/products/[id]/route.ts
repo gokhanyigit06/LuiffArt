@@ -1,113 +1,166 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
 export const dynamic = 'force-dynamic';
 
-// PUT /api/admin/products/[id] - Ürün güncelle
-export async function PUT(
-    request: NextRequest,
-    { params }: { params: Promise<{ id: string }> }
-) {
+// GET: Fetch single product details
+export async function GET(request: Request, context: { params: Promise<{ id: string }> }) {
     const session = await getServerSession(authOptions);
     if (!session) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     try {
-        const { id } = await params;
-        const body = await request.json();
-        const {
-            name, slug, description, images, categoryId, isActive,
-            tags, productType, vendor, seoTitle, seoDescription,
-            variants
-        } = body;
-
-        const result = await prisma.$transaction(async (tx) => {
-            // 1. Ürünü güncelle
-            const updatedProduct = await tx.product.update({
-                where: { id },
-                data: {
-                    name,
-                    slug,
-                    description,
-                    images: images || [],
-                    categoryId: categoryId || null,
-                    isActive,
-                    tags: tags || [],
-                    productType,
-                    vendor,
-                    seoTitle,
-                    seoDescription,
-                },
-            });
-
-            // 2. Varyantları güncelle
-            if (variants && variants.length > 0) {
-                const firstV = variants[0]; // UI şu an tek varyant gönderiyor
-
-                const existingVariants = await tx.productVariant.findMany({
-                    where: { productId: id }
-                });
-
-                if (existingVariants.length > 0) {
-                    await tx.productVariant.update({
-                        where: { id: existingVariants[0].id },
-                        data: {
-                            size: firstV.size,
-                            material: firstV.material,
-                            priceTRY: firstV.priceTRY,
-                            priceUSD: firstV.priceUSD,
-                            compareAtPriceTRY: firstV.compareAtPriceTRY,
-                            compareAtPriceUSD: firstV.compareAtPriceUSD,
-                            costPriceTRY: firstV.costPriceTRY,
-                            costPriceUSD: firstV.costPriceUSD,
-                            stock: firstV.stock,
-                            trackQuantity: firstV.trackQuantity,
-                            sku: firstV.sku,
-                            barcode: firstV.barcode
-                        }
-                    });
-                } else {
-                    await tx.productVariant.create({
-                        data: {
-                            ...firstV,
-                            productId: id
-                        }
-                    });
-                }
-            }
-
-            // Return updated product with its relations
-            return await tx.product.findUnique({
-                where: { id },
-                include: { category: true, variants: true }
-            });
+        const { id } = await context.params;
+        const product = await prisma.product.findUnique({
+            where: { id },
+            include: { category: true, variants: true }
         });
 
-        return NextResponse.json(result);
-    } catch (error) {
-        console.error('Error updating product:', error);
-        return NextResponse.json(
-            { error: 'Failed to update product' },
-            { status: 500 }
-        );
+        if (!product) {
+            return NextResponse.json({ error: 'Product not found' }, { status: 404 });
+        }
+
+        return NextResponse.json(product);
+    } catch (error: any) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }
 
-// DELETE /api/admin/products/[id] - Ürün sil
-export async function DELETE(
-    request: NextRequest,
-    { params }: { params: Promise<{ id: string }> }
-) {
+// PUT: Update product
+export async function PUT(request: Request, context: { params: Promise<{ id: string }> }) {
     const session = await getServerSession(authOptions);
     if (!session) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     try {
-        const { id } = await params;
+        const { id } = await context.params;
+        const body = await request.json();
+        const {
+            name, slug, description, images, categoryId, isActive,
+            tags, vendor, hasVariants, variants,
+            priceTRY, stock
+        } = body;
+
+        // 1. Update Product Details
+        const product = await prisma.product.update({
+            where: { id },
+            data: {
+                name,
+                slug: slug || undefined,
+                description,
+                images: images || [],
+                isActive: isActive,
+                categoryId,
+                vendor,
+                tags: tags || [],
+            },
+            include: { variants: true }
+        });
+
+        // 2. Handle Variants
+        if (hasVariants && variants && variants.length > 0) {
+            // Get IDs of variants sent from frontend
+            const sentVariantIds = variants.map((v: any) => v.id).filter(Boolean);
+
+            // Delete variants not in the list
+            await prisma.productVariant.deleteMany({
+                where: {
+                    productId: id,
+                    id: { notIn: sentVariantIds }
+                }
+            });
+
+            // Upsert variants
+            for (const v of variants) {
+                const variantImages = v.imageId ? [v.imageId] : [];
+                const variantData = {
+                    productId: id,
+                    size: v.options?.['Size'] || 'Standard',
+                    material: v.options?.['Material'] || 'Standard',
+                    priceTRY: v.priceTRY || 0,
+                    priceUSD: v.priceUSD || 0,
+                    stock: v.stock || 0,
+                    sku: v.sku || '',
+                    images: variantImages,
+                    trackQuantity: true
+                };
+
+                if (v.id) {
+                    // Update
+                    await prisma.productVariant.update({
+                        where: { id: v.id },
+                        data: variantData
+                    });
+                } else {
+                    // Create
+                    await prisma.productVariant.create({
+                        data: variantData
+                    });
+                }
+            }
+        } else {
+            // Handling switching from variants to single product or updating single product
+            const existingVariants = product.variants;
+            if (existingVariants.length > 0) {
+                const firstVar = existingVariants[0];
+
+                // Delete others
+                await prisma.productVariant.deleteMany({
+                    where: {
+                        productId: id,
+                        id: { not: firstVar.id }
+                    }
+                });
+
+                // Update first to Default
+                await prisma.productVariant.update({
+                    where: { id: firstVar.id },
+                    data: {
+                        size: 'Standard',
+                        material: 'Standard',
+                        priceTRY: priceTRY || 0,
+                        priceUSD: (priceTRY || 0) / 30, // Default conversion
+                        stock: stock || 0,
+                        sku: `${product.slug}-STD`.toUpperCase(),
+                    }
+                });
+            } else {
+                // Create new default
+                await prisma.productVariant.create({
+                    data: {
+                        productId: id,
+                        size: 'Standard',
+                        material: 'Standard',
+                        priceTRY: priceTRY || 0,
+                        priceUSD: (priceTRY || 0) / 30, // Default conversion
+                        stock: stock || 0,
+                        sku: `${product.slug}-STD`.toUpperCase(),
+                        trackQuantity: true
+                    }
+                });
+            }
+        }
+
+        return NextResponse.json({ success: true });
+    } catch (error: any) {
+        console.error('Update Error:', error);
+        return NextResponse.json({ error: error.message || 'Failed to update product' }, { status: 500 });
+    }
+}
+
+// DELETE: Delete product
+export async function DELETE(request: Request, context: { params: Promise<{ id: string }> }) {
+    const session = await getServerSession(authOptions);
+    if (!session) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    try {
+        const { id } = await context.params;
 
         await prisma.product.delete({
             where: { id },

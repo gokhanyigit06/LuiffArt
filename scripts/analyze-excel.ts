@@ -38,6 +38,6 @@ console.log(`  Ortalama Varyant/Model: ${(data.length / Object.keys(byModel).len
 const exampleModel = Object.keys(byModel)[0];
 console.log(`\n🔍 Örnek Model: ${exampleModel}`);
 console.log(`  Varyant Sayısı: ${byModel[exampleModel].length}`);
-byModel[exampleModel].forEach((variant, i) => {
-    console.log(`  ${i + 1}. ${variant['Ürün Rengi']} - ${variant['Boyut/Ebat']} - ${variant['Trendyol\\'da Satılacak Fiyat(KDV Dahil)']} TL`);
+byModel[exampleModel].forEach((variant: any, i: number) => {
+    console.log(`  ${i + 1}. ${variant['Ürün Rengi']} - ${variant['Boyut/Ebat']} - ${variant['Trendyol\'da Satılacak Fiyat(KDV Dahil)']} TL`);
 });

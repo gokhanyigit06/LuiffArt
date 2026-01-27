@@ -13,7 +13,8 @@ import {
     Settings,
     LogOut,
     ChevronLeft,
-    ChevronRight
+    ChevronRight,
+    BarChart3
 } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation';
 import { signOut } from 'next-auth/react';
@@ -32,6 +33,11 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
             key: '/admin',
             icon: <LayoutDashboard size={18} strokeWidth={1.5} />,
             label: 'Dashboard'
+        },
+        {
+            key: '/admin/analytics',
+            icon: <BarChart3 size={18} strokeWidth={1.5} />,
+            label: 'Pulse Analytics'
         },
         {
             key: '/admin/products',

@@ -1,51 +1,43 @@
-# Luiff Art - Proje Durum Raporu
+# Luiff Art - Proje Durum Raporu (Güncel)
 
 ## ✅ Tamamlanan Özellikler
 
 ### 1. Altyapı ve Veritabanı
-- [x] **Next.js 16 & Turbopack**: Proje kurulumu tamamlandı. (Turbopack uyumluluğu için Prisma v5'e sabitlendi).
-- [x] **PostgreSQL & Prisma**: Veritabanı şeması (User, Product, Category, Order) oluşturuldu.
-- [x] **Seed Data**: Başlangıç verileri (Kategoriler, Örnek Ürünler) eklendi.
+- [x] **Next.js 16 & Turbopack**: Kurulum ve yapılandırma tamam.
+- [x] **PostgreSQL & Prisma**: Tüm şemalar (User, Product, Order, ActivityLog, vb.) hazır.
+- [x] **Docker**: Production deployment için Dockerfile ve next.config.ts ayarlandı.
+- [x] **Swagger UI**: `/api-doc` adresinde aktif.
 
-### 2. Admin Paneli - Temel
-- [x] **Layout**: Sol menü (Dashboard, Ürünler, Kategoriler, Siparişler) ve responsive yapı.
-- [x] **Türkçe Dil**: Arayüz dili Türkçe olarak ayarlandı.
+### 2. Admin Paneli
+- [x] **Dashboard**: Pulse Analytics entegrasyonu (Grafikler, Özetler).
+- [x] **Ürün & Kategori Yönetimi**: Tam kapsamlı CRUD işlemleri.
+- [x] **Sipariş Yönetimi**: Sipariş listeleme ve detay.
+- [x] **Pulse Analytics**: 
+  - Ziyaretçi takibi (Logs).
+  - Satış hunisi (Funnel).
+  - Terk edilmiş sepet (Abandoned Cart) takibi.
+  - Excel Raporlama.
+- [x] **Giriş Güvenliği**: NextAuth ile admin koruması.
 
-### 3. Kategori Yönetimi
-- [x] **Listeleme**: Tüm kategoriler tabloda görüntüleniyor.
-- [x] **Ekleme/Düzenleme**: Modal içinde form yapısı. Otomatik "slug" oluşturma.
-- [x] **Silme**: Onay kutusu ile silme işlemi.
-- [x] **API**: `/api/admin/categories` endpoint'leri hazır.
+### 3. Kullanıcı Tarafı (Storefront)
+- [x] **Anasayfa & Listeleme**: Modern UI, filtreleme.
+- [x] **Ürün Detay**: Varyant seçimi, dinamik fiyat (TR/Global).
+- [x] **Sepet & Checkout**: İki aşamalı checkout, Iyzico/Stripe entegrasyonu (UI hazır, Backend simüle).
+- [x] **Hesap Portalı**: Sipariş geçmişi, profil yönetimi.
 
-### 4. Ürün Yönetimi
-- [x] **Listeleme**: Ürünler görselleriyle beraber listeleniyor.
-- [x] **Ekleme/Düzenleme**:
-  - İsim, Açıklama, Görsel URL
-  - Kategori Seçimi (Dropdown)
-  - **Fiyat (TL/USD)** ve **Stok** girişi (Otomatik varyant oluşturuluyor).
-- [x] **API**: `/api/admin/products` endpoint'leri hazır (Varyant desteğiyle).
-
-### 5. Geliştirici Araçları
-- [x] **Swagger UI**: API dokümantasyonu `/api-doc` adresinde aktif.
+### 4. Analitik & Raporlama
+- [x] **Veri Toplama**: Middleware ve API üzerinden session takibi.
+- [x] **Görselleştirme**: Recharts ile admin panelinde detaylı grafikler.
+- [x] **Dışa Aktarım**: Excel (XLSX) formatında rapor export.
 
 ---
 
 ## ⏳ Bekleyen / Sıradaki Özellikler
 
-### 1. Sipariş Yönetimi (Orders)
-- [ ] Sipariş listesi sayfası (Şu an boş).
-- [ ] Sipariş detayı görüntüleme.
-- [ ] Sipariş durumu güncelleme (Hazırlanıyor, Kargolandı vb.).
+### 1. Entegrasyonlar
+- [ ] **Ödeme**: Iyzico ve Stripe backend bağlantılarının canlıya alınması.
+- [ ] **Kargo**: Navlungo API entegrasyonu.
 
-### 2. Dashboard Anasayfa
-- [ ] Satış istatistikleri grafikleri.
-- [ ] Son siparişler özeti.
-
-### 3. Kullanıcı Tarafı (Storefront)
-- [ ] Anasayfa (Vitrin).
-- [ ] Ürün Detay Sayfası.
-- [ ] Sepet ve Ödeme (Checkout).
-
-### 4. Güvenlik
-- [ ] Admin Login Sayfası (Şu an herkes erişebilir).
-- [ ] Middleware ile admin koruması.
+### 2. İyileştirmeler
+- [ ] **Terk Edilmiş Sepet**: Otomatik e-posta gönderimi (Marketing).
+- [ ] **SEO**: Meta etiketlerinin (OG Tags) dinamikleştirilmesi.

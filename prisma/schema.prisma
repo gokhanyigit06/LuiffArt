@@ -64,6 +64,7 @@ model User {
   addresses     Address[]
   coupons       Coupon[]
   
+  activityLogs  ActivityLog[]
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 }
@@ -116,6 +117,8 @@ model Product {
   // Ürüne ait farklı boyut/çerçeve seçenekleri
   variants    ProductVariant[]
   
+  activityLogs  ActivityLog[]
+  summaries     AnalyticsSummary[]
   createdAt   DateTime         @default(now())
   updatedAt   DateTime         @updatedAt
 }
@@ -324,3 +327,46 @@ model Campaign {
   updatedAt      DateTime  @updatedAt
 }
 
+
+enum EventType {
+  VIEW
+  ADD_TO_CART
+  REMOVE_FROM_CART
+  WISHLIST
+  CHECKOUT_START
+  PURCHASE
+}
+
+model ActivityLog {
+  id          String    @id @default(cuid())
+  userId      String?
+  user        User?     @relation(fields: [userId], references: [id])
+  sessionId   String?   // Anonymous tracking
+  productId   String?
+  product     Product?  @relation(fields: [productId], references: [id])
+  eventType   EventType
+  utmSource   String?
+  metadata    Json?     // extra info like price, variants
+  createdAt   DateTime  @default(now())
+
+  @@index([userId])
+  @@index([sessionId])
+  @@index([productId])
+  @@index([createdAt])
+}
+
+model AnalyticsSummary {
+  id            String   @id @default(cuid())
+  date          DateTime @unique // Each record represents one day
+  totalViews    Int      @default(0)
+  totalCarts    Int      @default(0)
+  totalOrders   Int      @default(0)
+  totalRevenue  Decimal  @default(0) @db.Decimal(10, 2)
+  conversionRate Float    @default(0)
+  topProductId  String?
+  topProduct    Product? @relation(fields: [topProductId], references: [id])
+  
+  updatedAt     DateTime @updatedAt
+
+  @@index([date])
+}

@@ -2,6 +2,11 @@ import Header from "@/components/Header";
 import ProductDetailClient from "@/components/ProductDetailClient";
 import prisma from "@/lib/prisma";
 import { notFound } from "next/navigation";
+import { logActivity } from "@/lib/analytics";
+import { cookies } from "next/headers";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { EventType } from "@prisma/client";
 
 export const dynamic = 'force-dynamic';
 
@@ -44,6 +49,19 @@ export default async function ProductPage({ params }: { params: { slug: string }
         notFound();
     }
 
+    // Log Activity
+    const cookieStore = await cookies();
+    const sessionId = cookieStore.get('pulse_session_id')?.value;
+    const session = await getServerSession(authOptions);
+
+    // Background logging (non-blocking)
+    logActivity({
+        userId: session?.user?.id,
+        sessionId,
+        productId: product.id,
+        eventType: EventType.VIEW,
+    }).catch(err => console.error("Failed to log product view:", err));
+
     // Convert Decimals to numbers for Client Component serialization
     const serializedProduct = {
         ...product,
@@ -56,6 +74,7 @@ export default async function ProductPage({ params }: { params: { slug: string }
             width: v.width || 0,
             height: v.height || 0,
             depth: v.depth || 0,
+            images: v.images || [],
         }))
     };
 
