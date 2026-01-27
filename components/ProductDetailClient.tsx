@@ -24,13 +24,41 @@ interface ProductDetailProps {
 export default function ProductDetailClient({ product }: ProductDetailProps) {
     const { region, currency } = useRegion();
 
-    // Extract unique options
-    const sizes = Array.from(new Set(product.variants.map(v => v.size)));
-    const materials = Array.from(new Set(product.variants.map(v => v.material)));
+    // Extract unique options and sort them
+    const sizes = useMemo(() => {
+        const uniqueSizes = Array.from(new Set(product.variants.map(v => v.size)));
+        return uniqueSizes.sort((a, b) => {
+            const sizeA = parseInt(a.split(' ')[0] || '0');
+            const sizeB = parseInt(b.split(' ')[0] || '0');
+            return sizeA - sizeB;
+        });
+    }, [product.variants]);
 
-    // Initial state
-    const [selectedSize, setSelectedSize] = useState<string>(sizes[0] || '');
-    const [selectedMaterial, setSelectedMaterial] = useState<string>(materials[0] || '');
+    const materials = useMemo(() => {
+        const uniqueMaterials = Array.from(new Set(product.variants.map(v => v.material)));
+        const order = ['Çok Renkli', 'Çerçevesiz', 'Siyah', 'Beyaz', 'Ahşap'];
+
+        return uniqueMaterials.sort((a, b) => {
+            let indexA = order.findIndex(o => a.includes(o));
+            let indexB = order.findIndex(o => b.includes(o));
+
+            // Eğer listede yoksa sona at
+            if (indexA === -1) indexA = 99;
+            if (indexB === -1) indexB = 99;
+
+            return indexA - indexB;
+        });
+    }, [product.variants]);
+
+    // Initial state (select first availability)
+    const [selectedSize, setSelectedSize] = useState<string>('');
+    const [selectedMaterial, setSelectedMaterial] = useState<string>('');
+
+    useEffect(() => {
+        if (sizes.length > 0 && !selectedSize) setSelectedSize(sizes[0]);
+        if (materials.length > 0 && !selectedMaterial) setSelectedMaterial(materials[0]);
+    }, [sizes, materials, selectedSize, selectedMaterial]);
+
     const [isAdding, setIsAdding] = useState(false);
 
     // Cart Hook

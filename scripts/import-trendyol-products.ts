@@ -38,11 +38,9 @@ async function main() {
     const filePath = path.join(process.cwd(), 'trendyol ürünler.xlsx');
     const workbook = XLSX.readFile(filePath);
     const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-    let data: TrendyolRow[] = XLSX.utils.sheet_to_json(worksheet);
+    const data: TrendyolRow[] = XLSX.utils.sheet_to_json(worksheet);
 
-    if (limitNum) {
-        data = data.slice(0, limitNum);
-    }
+    // Limit burada uygulanmaz, model bazlı uygulanır (aşağıda)
 
     console.log(`📦 Toplam Satır: ${data.length}\n`);
 
@@ -80,19 +78,52 @@ async function main() {
         return acc;
     }, {} as Record<string, TrendyolRow[]>);
 
-    console.log(`🎨 Unique Model: ${Object.keys(byModel).length}`);
+    const modelKeys = Object.keys(byModel);
+    console.log(`🎨 Unique Model: ${modelKeys.length}`);
     console.log(`📊 Toplam Varyant: ${data.length}\n`);
+
+    // Limit varsa model bazında uygula
+    const modelsToProcess = limitNum ? modelKeys.slice(0, limitNum) : modelKeys;
 
     // 3. Ürünleri import et
     let imported = 0;
     let skipped = 0;
 
-    for (const [modelCode, variants] of Object.entries(byModel)) {
+    for (const modelCode of modelsToProcess) {
+        const variants = byModel[modelCode];
         const firstVariant = variants[0];
         const productName = firstVariant['Ürün Adı'];
         const categoryName = firstVariant['Kategori İsmi'];
 
-        // Slug oluştur
+        // Sıralama Kuralları
+        const frameOrder = ['Çerçevesiz', 'Siyah', 'Beyaz', 'Ahşap'];
+        const sizeOrder = ['21 x 30', '30 x 40', '40 x 50', '50 x 70', '60 x 90']; // Dosyadaki formatı '21 x 30' gibi olabilir, kontrol etmek lazım
+
+        variants.sort((a, b) => {
+            const frameA = frameOrder.indexOf(a['Ürün Rengi']) !== -1 ? frameOrder.indexOf(a['Ürün Rengi']) : 99;
+            const frameB = frameOrder.indexOf(b['Ürün Rengi']) !== -1 ? frameOrder.indexOf(b['Ürün Rengi']) : 99;
+
+            if (frameA !== frameB) return frameA - frameB;
+
+            // Boyut sıralaması (Basit string karşılaştırma yerine alana göre)
+            // Boyut formatı "50 x 70" ise ilk sayıyı alıp sıralayabiliriz
+            const sizeA = parseInt(a['Boyut/Ebat'].split(' ')[0] || '0');
+            const sizeB = parseInt(b['Boyut/Ebat'].split(' ')[0] || '0');
+
+            return sizeA - sizeB;
+        });
+
+        // Ana görsel seçimi: Çerçevesiz (Çok Renkli) varyantın ilk görseli, yoksa ilk varyantınki
+        const chargelessVariant = variants.find(v => v['Ürün Rengi'] === 'Çok Renkli' || v['Ürün Rengi'] === 'Çerçevesiz');
+        const mainVariant = chargelessVariant || variants[0];
+
+        // Görselleri topla (Parent için)
+        const parentImages: string[] = [];
+        for (let i = 1; i <= 8; i++) {
+            const img = mainVariant[`Görsel ${i}` as keyof TrendyolRow];
+            if (img) parentImages.push(img);
+        }
+
         const productSlug = `${productName}-${modelCode}`
             .toLowerCase()
             .replace(/ı/g, 'i')
@@ -105,19 +136,12 @@ async function main() {
             .replace(/^-+|-+$/g, '')
             .substring(0, 100);
 
-        // Görselleri topla (Parent için - ilk varyantın görselleri)
-        const firstVariantImages: string[] = [];
-        for (let i = 1; i <= 8; i++) {
-            const img = firstVariant[`Görsel ${i}` as keyof TrendyolRow];
-            if (img) firstVariantImages.push(img);
-        }
-
         if (isDryRun) {
             console.log(`\n📦 ${productName}`);
             console.log(`   Model: ${modelCode}`);
             console.log(`   Kategori: ${categoryName}`);
             console.log(`   Varyant Sayısı: ${variants.length}`);
-            console.log(`   Görsel: ${firstVariantImages.length} adet`);
+            console.log(`   Ana Görsel Kaynağı: ${mainVariant['Ürün Rengi']} (Renk)`);
             variants.forEach((v, i) => {
                 console.log(`   ${i + 1}. ${v['Ürün Rengi']} - ${v['Boyut/Ebat']} - ${v["Trendyol'da Satılacak Fiyat (KDV Dahil)"]} TL`);
             });
@@ -126,7 +150,7 @@ async function main() {
         }
 
         try {
-            // Kategoriyi bul
+            // ... (Kategori kodu aynı) ...
             const categorySlug = categoryName.toLowerCase()
                 .replace(/ı/g, 'i')
                 .replace(/ğ/g, 'g')
@@ -137,7 +161,11 @@ async function main() {
                 .replace(/[^a-z0-9]+/g, '-')
                 .replace(/^-+|-+$/g, '');
 
-            const category = await prisma.category.findUnique({ where: { slug: categorySlug } });
+            const category = await prisma.category.upsert({
+                where: { slug: categorySlug },
+                update: {},
+                create: { name: categoryName, slug: categorySlug }
+            });
 
             // Ürün oluştur (Parent)
             const product = await prisma.product.create({
@@ -145,10 +173,10 @@ async function main() {
                     name: productName,
                     slug: productSlug,
                     description: firstVariant['Ürün Açıklaması'] || `${productName} - Yüksek kaliteli poster ve tablo`,
-                    // Parent görseli olarak ilk varyantınkileri kullan
-                    images: firstVariantImages,
+                    // Parent görseli (Çerçevesiz veya ilk varyant)
+                    images: parentImages,
                     isActive: true,
-                    categoryId: category?.id,
+                    categoryId: category.id,
                     vendor: firstVariant['Marka'],
                     modelCode,
                     tags: [categoryName, firstVariant['Marka']].filter(Boolean),
