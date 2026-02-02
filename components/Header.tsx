@@ -1,66 +1,121 @@
-'use client';
-import { Badge, Button } from 'antd';
-import { ShoppingCartOutlined, MenuOutlined } from '@ant-design/icons';
-import Link from 'next/link';
-import { motion } from 'framer-motion';
-import { useCart } from '@/lib/store/useCart';
-import CartDrawer from './CartDrawer';
-import { useEffect, useState } from 'react';
+"use client";
+
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { Bookmark, User, ShoppingBag } from "lucide-react";
+import { useCart } from "@/lib/store/useCart";
 
 export default function Header() {
-    const { openCart, items } = useCart();
     const [mounted, setMounted] = useState(false);
+    const { items: cartItems, openCart } = useCart();
+    const cartCount = cartItems.reduce((acc: number, item: any) => acc + item.quantity, 0);
 
     useEffect(() => {
         setMounted(true);
     }, []);
 
-    const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
-
     return (
-        <>
-            <motion.header
-                initial={{ y: -100, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ duration: 0.8, ease: "easeOut" }}
-                className="fixed top-0 left-0 right-0 z-50 px-4 md:px-6 py-4"
+        <header
+            style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr 1fr',
+                alignItems: 'center',
+                width: '100%',
+                height: '96px',
+                padding: '0 24px',
+                boxSizing: 'border-box',
+                backgroundColor: '#ffffff',
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                zIndex: 50,
+                borderBottom: '1px solid #f5f5f5'
+            }}
+        >
+            {/* SOL: Logo */}
+            <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center' }}>
+                <Link
+                    href="/"
+                    style={{
+                        fontSize: '20px',
+                        fontWeight: 700,
+                        letterSpacing: '0.35em',
+                        color: '#000000',
+                        textTransform: 'uppercase',
+                        textDecoration: 'none'
+                    }}
+                >
+                    LUIFF ART
+                </Link>
+            </div>
+
+            {/* ORTA: Navigasyon */}
+            <div
+                style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    gap: '80px'
+                }}
             >
-                <div className="glass-panel mx-auto max-w-7xl rounded-full px-6 py-3 flex items-center justify-between shadow-sm">
-                    {/* Logo */}
-                    <Link href="/" className="font-italiana text-2xl font-bold tracking-tight text-gray-900">
-                        LUIFF ART
-                    </Link>
+                <Link
+                    href="/category/posterler"
+                    style={{
+                        fontSize: '10px',
+                        fontWeight: 600,
+                        letterSpacing: '0.4em',
+                        color: '#000000',
+                        textTransform: 'uppercase',
+                        textDecoration: 'none'
+                    }}
+                >
+                    POSTERLER
+                </Link>
+                <Link
+                    href="/category/cerceveler"
+                    style={{
+                        fontSize: '10px',
+                        fontWeight: 600,
+                        letterSpacing: '0.4em',
+                        color: '#000000',
+                        textTransform: 'uppercase',
+                        textDecoration: 'none'
+                    }}
+                >
+                    ÇERÇEVELER
+                </Link>
+            </div>
 
-                    {/* Navigation (Desktop) */}
-                    <nav className="hidden md:flex items-center gap-8 font-outfit text-sm font-medium tracking-wide text-gray-600">
-                        <Link href="/collections" className="hover:text-black transition-colors">COLLECTIONS</Link>
-                        <Link href="/artists" className="hover:text-black transition-colors">ARTISTS</Link>
-                        <Link href="/about" className="hover:text-black transition-colors">ABOUT</Link>
-                    </nav>
+            {/* SAĞ: İkonlar - Bookmark, User, ShoppingBag */}
+            <div
+                style={{
+                    display: 'flex',
+                    justifyContent: 'flex-end',
+                    alignItems: 'center',
+                    gap: '20px',
+                    paddingRight: '10px'
+                }}
+            >
+                {/* Wishlist */}
+                <Link href="/wishlist" style={{ display: 'flex', alignItems: 'center' }}>
+                    <Bookmark size={20} color="#000000" strokeWidth={1.2} />
+                </Link>
 
-                    {/* Actions */}
-                    <div className="flex items-center gap-2">
-                        <Badge count={mounted ? totalItems : 0} size="small" offset={[-2, 2]} showZero color="black">
-                            <Button
-                                type="text"
-                                shape="circle"
-                                className="hover:bg-black/5"
-                                onClick={openCart}
-                                icon={<ShoppingCartOutlined style={{ fontSize: '20px' }} />}
-                            />
-                        </Badge>
-                        <Button
-                            className="md:hidden hover:bg-black/5"
-                            type="text"
-                            shape="circle"
-                            icon={<MenuOutlined style={{ fontSize: '20px' }} />}
-                        />
-                    </div>
+                {/* Account */}
+                <Link href="/account" style={{ display: 'flex', alignItems: 'center' }}>
+                    <User size={20} color="#000000" strokeWidth={1.2} />
+                </Link>
+
+                {/* Shopping Bag / Cart */}
+                <div
+                    onClick={openCart}
+                    style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
+                >
+                    <ShoppingBag size={20} color="#000000" strokeWidth={1.2} />
                 </div>
-            </motion.header>
+            </div>
 
-            {/* Global Cart Drawer */}
-            <CartDrawer />
-        </>
-    )
+        </header>
+    );
 }
