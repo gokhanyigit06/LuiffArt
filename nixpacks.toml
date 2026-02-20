@@ -1,8 +1,2 @@
-[phases.setup]
-nixPkgs = ["nodejs_22"]
-
-[phases.build]
-cmds = ["npm install", "npx prisma generate", "npm run build"]
-
-[start]
-cmd = "npm start"
+[phases.install]
+cmds = ["npm install --legacy-peer-deps"]
