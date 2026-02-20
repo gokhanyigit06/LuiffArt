@@ -49,11 +49,10 @@ export const Products: CollectionConfig = {
                     fields: [
                         {
                             name: 'images',
-                            type: 'array',
-                            admin: { description: 'Main images for this product' },
-                            fields: [
-                                { name: 'image', type: 'upload', relationTo: 'media', required: true }
-                            ]
+                            type: 'relationship',
+                            relationTo: 'media',
+                            hasMany: true,
+                            admin: { description: 'Ürüne ait tüm görselleri (Toplu Seçim) buradan ekleyin.' }
                         },
                         {
                             name: 'variants',
@@ -70,7 +69,17 @@ export const Products: CollectionConfig = {
                                     fields: [
                                         { name: 'color', type: 'text', admin: { width: '33%', description: 'e.g. Black' } },
                                         { name: 'size', type: 'text', admin: { width: '33%', description: 'e.g. 50x70cm' } },
-                                        { name: 'image', type: 'upload', relationTo: 'media', admin: { width: '34%', description: 'Variant specific image' } },
+                                        {
+                                            name: 'image',
+                                            type: 'upload',
+                                            relationTo: 'media',
+                                            admin: {
+                                                width: '34%',
+                                                components: {
+                                                    Field: '@/components/payload/VariantImageSelect',
+                                                }
+                                            }
+                                        },
                                     ]
                                 },
                                 {

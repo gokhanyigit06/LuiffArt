@@ -23,10 +23,6 @@ export const Media: CollectionConfig = {
             {
                 name: 'tablet',
                 width: 1024,
-                // By specifying `undefined` or leaving a height undefined,
-                // the image will be sized to a certain width,
-                // but it will retain its original aspect ratio
-                // and calculate a height automatically.
                 height: undefined,
                 position: 'centre',
             },
@@ -34,11 +30,26 @@ export const Media: CollectionConfig = {
         adminThumbnail: 'thumbnail',
         mimeTypes: ['image/*'],
     },
+    hooks: {
+        beforeChange: [
+            ({ data, req, operation }) => {
+                if (operation === 'create' || operation === 'update') {
+                    if (!data.alt && data.filename) {
+                        let name = data.filename.split('.').slice(0, -1).join('.')
+                        name = name.replace(/[-_]/g, ' ')
+                        data.alt = name.replace(/\b\w/g, (c: string) => c.toUpperCase())
+                    } else if (!data.alt) {
+                        data.alt = 'Uploaded Image'
+                    }
+                }
+                return data
+            }
+        ]
+    },
     fields: [
         {
             name: 'alt',
             type: 'text',
-            required: true,
         },
     ],
 }
