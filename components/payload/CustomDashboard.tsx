@@ -127,25 +127,25 @@ export default async function CustomDashboard() {
             <div className="flex flex-col gap-6">
 
                 {/* ─── Header: Title + Quick Actions ─── */}
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-6 border-b border-border/40">
                     <div>
                         <h1 className="text-3xl font-bold tracking-tight">
                             Luiff Art <span className="text-brand">Dashboard</span>
                         </h1>
-                        <p className="text-muted-foreground mt-1">
+                        <h2 className="text-sm text-muted-foreground mt-1 font-normal uppercase tracking-wider">
                             Executive overview of your gallery&apos;s performance.
-                        </p>
+                        </h2>
                     </div>
-                    <div className="flex items-center gap-2">
-                        <Button variant="default" size="sm" className="bg-brand hover:bg-brand-primary-dark text-white">
+                    <div className="flex items-center gap-3">
+                        <Button variant="default" size="sm" className="bg-brand hover:bg-brand-primary-dark text-white gap-2">
                             <Plus className="h-4 w-4" strokeWidth={1.5} />
-                            Add Product
+                            <span>Add Product</span>
                         </Button>
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" className="gap-2">
                             <ExternalLink className="h-4 w-4" strokeWidth={1.5} />
-                            View Store
+                            <span>View Store</span>
                         </Button>
-                        <Button variant="ghost" size="icon">
+                        <Button variant="ghost" size="icon" className="h-9 w-9">
                             <Settings className="h-4 w-4" strokeWidth={1.5} />
                         </Button>
                     </div>
