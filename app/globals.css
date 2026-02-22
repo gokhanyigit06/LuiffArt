@@ -4,57 +4,60 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  /* Clean Professional Palette */
-  --background: #F5F7FA;
-  --foreground: #1a202c;
-  --sidebar-bg: #001529;
-  --card-bg: #ffffff;
-
-  /* Luxury Art Gallery Accents */
-  --luxury-black: #1a1a1a;
-  --luxury-gold: #D4AF37;
-  --luxury-gold-dark: #B8941F;
-
-  /* Fonts */
-  --font-italiana: 'Italiana', serif;
-  --font-outfit: 'Outfit', sans-serif;
+@theme {
+  --color-brand-primary: #8b5e3c; /* Luiffart Walnut Signature */
+  --radius-xl: 1rem;
+  --font-sans: var(--font-outfit);
 }
 
-body {
-  background-color: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-outfit);
+@layer base {
+  :root {
+    --background: var(--theme-bg);
+    --foreground: var(--theme-elevation-900);
+    --card: var(--theme-elevation-50);
+    --border: var(--theme-elevation-150);
+    --primary: var(--color-brand-primary);
+    
+    /* Custom Payload overrides / legacy */
+    --sidebar-bg: #001529;
+    --card-bg: #ffffff;
+    --luxury-black: #1a1a1a;
+    --luxury-gold: #D4AF37;
+    --luxury-gold-dark: #B8941F;
+    --font-italiana: 'Italiana', serif;
+    --font-outfit: 'Outfit', sans-serif;
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-outfit);
+  }
 }
 
 @layer utilities {
   .font-italiana {
     font-family: var(--font-italiana);
   }
-
   .font-outfit {
     font-family: var(--font-outfit);
   }
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-outfit);
-}
+@layer components {
+  /* Luxury Button Overrides */
+  .ant-btn-primary {
+    background-color: var(--luxury-black) !important;
+    border-color: var(--luxury-black) !important;
+  }
 
-/* Luxury Button Overrides */
-.ant-btn-primary {
-  background-color: var(--luxury-black) !important;
-  border-color: var(--luxury-black) !important;
-}
+  .ant-btn-primary:hover {
+    background-color: var(--luxury-gold-dark) !important;
+    border-color: var(--luxury-gold-dark) !important;
+  }
 
-.ant-btn-primary:hover {
-  background-color: var(--luxury-gold-dark) !important;
-  border-color: var(--luxury-gold-dark) !important;
-}
-
-.ant-btn-primary:focus {
-  background-color: var(--luxury-black) !important;
-  border-color: var(--luxury-gold) !important;
+  .ant-btn-primary:focus {
+    background-color: var(--luxury-black) !important;
+    border-color: var(--luxury-gold) !important;
+  }
 }

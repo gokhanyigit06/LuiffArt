@@ -1,7 +1,20 @@
 import React from 'react'
 import configPromise from '@/payload.config'
 import { getPayload } from 'payload'
-// import { DefaultDashboard } from '@payloadcms/next/views' // To keep default elements if needed
+import { Gutter } from '@payloadcms/ui'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { ShoppingCart, Users, TrendingUp } from 'lucide-react'
+import { RecentOrdersTable } from './RecentOrdersTable'
+import { DashboardChart } from './DashboardChart'
+
+const mockChartData = [
+    { name: 'Jan', total: 1200 },
+    { name: 'Feb', total: 2100 },
+    { name: 'Mar', total: 1800 },
+    { name: 'Apr', total: 2400 },
+    { name: 'May', total: 2800 },
+    { name: 'Jun', total: 3200 },
+]
 
 export default async function CustomDashboard() {
     const payload = await getPayload({ config: configPromise })
@@ -20,47 +33,56 @@ export default async function CustomDashboard() {
     })
 
     return (
-        <div className="custom-dashboard" style={{ padding: '2rem' }}>
-            <h1>Luiff Art Analytics & Dashboard</h1>
-            <p>Welcome to your customized Payload CMS Dashboard.</p>
+        <Gutter className="py-8">
+            <div className="flex flex-col gap-8">
+                <div>
+                    <h1 className="text-3xl font-bold tracking-tight">Luiff Art Analytics & Dashboard</h1>
+                    <p className="text-muted-foreground mt-2">Executive overview of your gallery's performance.</p>
+                </div>
 
-            <div style={{ display: 'flex', gap: '2rem', marginTop: '2rem' }}>
-                <div style={{ padding: '2rem', border: '1px solid #ccc', borderRadius: '8px', flex: 1 }}>
-                    <h2>Total Orders</h2>
-                    <p style={{ fontSize: '3rem', margin: 0 }}>{orders.totalDocs}</p>
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">Total Orders</CardTitle>
+                            <ShoppingCart className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">{orders.totalDocs}</div>
+                            <p className="text-xs text-muted-foreground">+20.1% from last month</p>
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">Registered Users</CardTitle>
+                            <Users className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">{users.totalDocs}</div>
+                            <p className="text-xs text-muted-foreground">+180 new artists and collectors</p>
+                        </CardContent>
+                    </Card>
+
+                    <Card className="col-span-1 md:col-span-2 lg:col-span-1">
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">Sales Trends (Mock)</CardTitle>
+                            <TrendingUp className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
+                        </CardHeader>
+                        <CardContent className="h-[90px]">
+                            <DashboardChart data={mockChartData} />
+                        </CardContent>
+                    </Card>
                 </div>
-                <div style={{ padding: '2rem', border: '1px solid #ccc', borderRadius: '8px', flex: 1 }}>
-                    <h2>Registered Users</h2>
-                    <p style={{ fontSize: '3rem', margin: 0 }}>{users.totalDocs}</p>
-                </div>
+
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Recent Orders</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <RecentOrdersTable orders={orders} />
+                    </CardContent>
+                </Card>
             </div>
-
-            <h3 style={{ marginTop: '3rem' }}>Recent Orders</h3>
-            <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse' }}>
-                <thead>
-                    <tr style={{ borderBottom: '2px solid #ccc' }}>
-                        <th style={{ padding: '1rem 0' }}>Order Number</th>
-                        <th>Status</th>
-                        <th>Amount</th>
-                        <th>Date</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {orders.docs.map((order) => (
-                        <tr key={order.id} style={{ borderBottom: '1px solid #eee' }}>
-                            <td style={{ padding: '1rem 0' }}>#{order.orderNumber}</td>
-                            <td>{order.status}</td>
-                            <td>{order.totalAmount}</td>
-                            <td>{new Date(order.createdAt).toLocaleDateString()}</td>
-                        </tr>
-                    ))}
-                    {orders.docs.length === 0 && (
-                        <tr>
-                            <td colSpan={4} style={{ padding: '1rem 0', textAlign: 'center' }}>No orders found</td>
-                        </tr>
-                    )}
-                </tbody>
-            </table>
-        </div>
+        </Gutter>
     )
 }
