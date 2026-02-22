@@ -51,24 +51,24 @@ interface StatCardProps {
 
 function StatCard({ title, value, description, icon, trend, trendValue }: StatCardProps) {
     return (
-        <Card className="dashboard-stat-card shadow-sm border-border/50">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
-                <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+        <Card className="rounded-xl border-border/40 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md bg-card">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-6">
+                <CardTitle className="text-sm font-medium tracking-tight text-muted-foreground">{title}</CardTitle>
+                <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
                     {icon}
                 </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-6 pt-0">
                 <div className="text-3xl font-bold tracking-tight">{value}</div>
-                <div className="flex items-center gap-1 mt-1">
+                <div className="flex items-center gap-1 mt-1 text-sm text-muted-foreground">
                     {trend === 'up' && <ArrowUpRight className="h-3 w-3 text-emerald-500" strokeWidth={2.5} />}
                     {trend === 'down' && <ArrowDownRight className="h-3 w-3 text-red-500" strokeWidth={2.5} />}
                     {trendValue && (
-                        <span className={`text-xs font-medium ${trend === 'up' ? 'text-emerald-500' : 'text-red-500'}`}>
+                        <span className={`font-medium ${trend === 'up' ? 'text-emerald-500' : 'text-red-500'}`}>
                             {trendValue}
                         </span>
                     )}
-                    <span className="text-xs text-muted-foreground">{description}</span>
+                    <span>{description}</span>
                 </div>
             </CardContent>
         </Card>
@@ -190,33 +190,33 @@ export default async function CustomDashboard() {
                 {/* ─── Row 2: Chart (2/3) + Activity (1/3) ─── */}
                 <div className="grid gap-6 lg:grid-cols-3">
                     {/* Sales Trends Chart */}
-                    <Card className="lg:col-span-2 shadow-sm border-border/50">
-                        <CardHeader>
+                    <Card className="lg:col-span-2 shadow-sm border-border/40 rounded-xl bg-card">
+                        <CardHeader className="p-6">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <CardTitle className="text-lg">Sales Trends</CardTitle>
+                                    <CardTitle className="text-lg tracking-tight">Sales Trends</CardTitle>
                                     <CardDescription>Monthly revenue overview for 2024</CardDescription>
                                 </div>
                                 <TrendingUp className="h-5 w-5 text-muted-foreground" strokeWidth={1.5} />
                             </div>
                         </CardHeader>
-                        <CardContent className="h-[280px]">
+                        <CardContent className="h-[280px] p-6 pt-0">
                             <DashboardChart data={mockChartData} />
                         </CardContent>
                     </Card>
 
                     {/* Recent Activity */}
-                    <Card className="shadow-sm border-border/50">
-                        <CardHeader>
+                    <Card className="shadow-sm border-border/40 rounded-xl bg-card">
+                        <CardHeader className="p-6">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <CardTitle className="text-lg">Recent Activity</CardTitle>
+                                    <CardTitle className="text-lg tracking-tight">Recent Activity</CardTitle>
                                     <CardDescription>Latest store events</CardDescription>
                                 </div>
                                 <Clock className="h-5 w-5 text-muted-foreground" strokeWidth={1.5} />
                             </div>
                         </CardHeader>
-                        <CardContent>
+                        <CardContent className="p-6 pt-0">
                             <div className="flex flex-col ml-2 mt-2">
                                 {mockRecentActivity.map((item, idx) => (
                                     <ActivityItem
@@ -233,11 +233,11 @@ export default async function CustomDashboard() {
                 </div>
 
                 {/* ─── Row 3: Orders Table ─── */}
-                <Card className="shadow-sm border-border/50">
-                    <CardHeader>
+                <Card className="shadow-sm border-border/40 rounded-xl bg-card">
+                    <CardHeader className="p-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <CardTitle className="text-lg">Recent Orders</CardTitle>
+                                <CardTitle className="text-lg tracking-tight">Recent Orders</CardTitle>
                                 <CardDescription>Your last 10 orders</CardDescription>
                             </div>
                             <Button variant="outline" size="sm">
@@ -245,7 +245,7 @@ export default async function CustomDashboard() {
                             </Button>
                         </div>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="p-6 pt-0">
                         <RecentOrdersTable orders={orders} />
                     </CardContent>
                 </Card>

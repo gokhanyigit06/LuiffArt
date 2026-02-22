@@ -26,32 +26,35 @@
 @layer base {
   :root {
     /* Core Shadcn mappings → Payload theme engine */
-    --background: var(--theme-bg, #ffffff);
-    --foreground: var(--theme-elevation-900, #0f0f0f);
+    --background: #09090b;
+    /* Çok koyu gri, saf siyah değil */
+    --foreground: var(--theme-elevation-900, #fafafa);
 
-    --card: var(--theme-elevation-50, #fafafa);
-    --card-foreground: var(--theme-elevation-900, #0f0f0f);
+    --card: #09090b;
+    --card-foreground: var(--theme-elevation-900, #fafafa);
 
-    --popover: var(--theme-elevation-50, #fafafa);
-    --popover-foreground: var(--theme-elevation-900, #0f0f0f);
+    --popover: #09090b;
+    --popover-foreground: var(--theme-elevation-900, #fafafa);
 
-    --primary: var(--color-brand-primary);
+    --primary: #8b5e3c;
+    /* Senin o meşhur ceviz rengin */
     --primary-foreground: #ffffff;
 
-    --secondary: var(--theme-elevation-100, #f0f0f0);
-    --secondary-foreground: var(--theme-elevation-800, #1f1f1f);
+    --secondary: #27272a;
+    --secondary-foreground: #fafafa;
 
-    --muted: var(--theme-elevation-100, #f0f0f0);
-    --muted-foreground: var(--theme-elevation-500, #737373);
+    --muted: #27272a;
+    --muted-foreground: #a1a1aa;
 
-    --accent: var(--theme-elevation-100, #f0f0f0);
-    --accent-foreground: var(--theme-elevation-800, #1f1f1f);
+    --accent: #27272a;
+    --accent-foreground: #fafafa;
 
     --destructive: #ef4444;
     --destructive-foreground: #ffffff;
 
-    --border: var(--theme-elevation-150, #e5e5e5);
-    --input: var(--theme-elevation-150, #e5e5e5);
+    --border: #27272a;
+    /* Çizgileri bu renge çekiyoruz, beyazdan kurtuluyoruz */
+    --input: #27272a;
     --ring: var(--color-brand-primary);
 
     --radius: 0.75rem;
@@ -71,6 +74,11 @@
     font-family: var(--font-outfit);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Shadcn kartlarının etrafındaki o çirkin beyazlığı bu yumuşatır */
+  .border {
+    border-color: var(--border);
   }
 }
 
