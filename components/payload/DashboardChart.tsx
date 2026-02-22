@@ -11,7 +11,23 @@ import {
     YAxis,
 } from 'recharts'
 
+import { TrendingUp } from 'lucide-react'
+
 export function DashboardChart({ data }: { data: any[] }) {
+    if (!data || data.length === 0) {
+        return (
+            <div className="flex flex-col items-center justify-center h-full text-center">
+                <div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mb-3">
+                    <TrendingUp className="h-6 w-6 text-muted-foreground" strokeWidth={1.5} />
+                </div>
+                <p className="text-sm font-medium text-muted-foreground">No data available</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                    Check back later when sales data is populated.
+                </p>
+            </div>
+        )
+    }
+
     return (
         <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={data} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>

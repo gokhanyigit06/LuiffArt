@@ -40,7 +40,7 @@ export function RecentOrdersTable({ orders }: { orders: any }) {
     const orderColumns = [
         {
             accessorKey: "orderNumber",
-            header: "Order",
+            header: () => <div className="text-xs uppercase tracking-wider text-muted-foreground">Order</div>,
             cell: ({ row }: any) => (
                 <div className="font-semibold text-sm">
                     #{row.getValue("orderNumber")}
@@ -49,17 +49,17 @@ export function RecentOrdersTable({ orders }: { orders: any }) {
         },
         {
             accessorKey: "status",
-            header: "Status",
+            header: () => <div className="text-xs uppercase tracking-wider text-muted-foreground">Status</div>,
             cell: ({ row }: any) => <StatusBadge status={row.getValue("status")} />,
         },
         {
             accessorKey: "paymentStatus",
-            header: "Payment",
+            header: () => <div className="text-xs uppercase tracking-wider text-muted-foreground">Payment</div>,
             cell: ({ row }: any) => <StatusBadge status={row.getValue("paymentStatus")} />,
         },
         {
             accessorKey: "totalAmount",
-            header: "Amount",
+            header: () => <div className="text-xs uppercase tracking-wider text-muted-foreground">Amount</div>,
             cell: ({ row }: any) => {
                 const amount = parseFloat(row.getValue("totalAmount"))
                 const formatted = new Intl.NumberFormat("tr-TR", {
@@ -71,7 +71,7 @@ export function RecentOrdersTable({ orders }: { orders: any }) {
         },
         {
             accessorKey: "createdAt",
-            header: "Date",
+            header: () => <div className="text-xs uppercase tracking-wider text-muted-foreground">Date</div>,
             cell: ({ row }: any) => (
                 <div className="text-sm text-muted-foreground">
                     {new Date(row.getValue("createdAt")).toLocaleDateString('tr-TR', {

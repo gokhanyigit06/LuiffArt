@@ -75,15 +75,16 @@ function StatCard({ title, value, description, icon, trend, trendValue }: StatCa
     )
 }
 
-function ActivityItem({ action, detail, time }: { action: string; detail: string; time: string }) {
+function ActivityItem({ action, detail, time, isLast }: { action: string; detail: string; time: string; isLast: boolean }) {
     return (
-        <div className="flex items-start gap-3 py-3 border-b border-border/50 last:border-0">
-            <div className="h-2 w-2 rounded-full bg-primary mt-2 shrink-0" />
-            <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium leading-tight">{action}</p>
-                <p className="text-xs text-muted-foreground mt-0.5 truncate">{detail}</p>
+        <div className="relative flex items-start gap-4 pb-4">
+            {!isLast && <div className="absolute left-1.5 top-3 h-full w-px bg-border/50" />}
+            <div className="relative z-10 mt-1 h-3 w-3 shrink-0 rounded-full border-2 border-primary bg-background shadow-sm" />
+            <div className="flex-1 min-w-0 pb-2">
+                <p className="text-sm font-medium leading-none mb-1 text-foreground">{action}</p>
+                <p className="text-xs text-muted-foreground truncate">{detail}</p>
             </div>
-            <span className="text-xs text-muted-foreground whitespace-nowrap">{time}</span>
+            <span className="text-[10px] sm:text-xs text-muted-foreground whitespace-nowrap mt-0.5 uppercase tracking-wider">{time}</span>
         </div>
     )
 }
@@ -122,8 +123,8 @@ export default async function CustomDashboard() {
     }).format(mockRevenue || 24650)
 
     return (
-        <Gutter className="py-8">
-            <div className="flex flex-col gap-8">
+        <Gutter className="p-8">
+            <div className="flex flex-col gap-6">
 
                 {/* ─── Header: Title + Quick Actions ─── */}
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -216,13 +217,14 @@ export default async function CustomDashboard() {
                             </div>
                         </CardHeader>
                         <CardContent>
-                            <div className="flex flex-col">
-                                {mockRecentActivity.map((item) => (
+                            <div className="flex flex-col ml-2 mt-2">
+                                {mockRecentActivity.map((item, idx) => (
                                     <ActivityItem
                                         key={item.id}
                                         action={item.action}
                                         detail={item.detail}
                                         time={item.time}
+                                        isLast={idx === mockRecentActivity.length - 1}
                                     />
                                 ))}
                             </div>
