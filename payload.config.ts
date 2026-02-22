@@ -37,6 +37,7 @@ export default buildConfig({
         pool: {
             connectionString: process.env.DATABASE_URL || 'postgresql://placeholder:placeholder@localhost:5432/placeholder',
         },
+        push: true,
     }),
     typescript: {
         outputFile: path.resolve(dirname, 'payload-types.ts'),
