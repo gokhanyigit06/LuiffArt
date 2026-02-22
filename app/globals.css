@@ -4,23 +4,60 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ──────────────────────────────────────────────────────────────
+   THEME SYSTEM — Brand Design Tokens
+   ────────────────────────────────────────────────────────────── */
 @theme {
-  --color-brand-primary: #8b5e3c; /* Luiffart Walnut Signature */
+  --color-brand-primary: #8b5e3c;
+  --color-brand-primary-light: #a47a5a;
+  --color-brand-primary-dark: #6d4a2e;
+  --color-brand-gold: #D4AF37;
+  --color-brand-gold-dark: #B8941F;
   --radius-xl: 1rem;
   --font-sans: var(--font-outfit);
 }
 
+/* ──────────────────────────────────────────────────────────────
+   BASE LAYER — Payload ↔ Shadcn CSS Variable Bridge
+   This maps Payload's internal theme variables to Shadcn's
+   expected variable names. When Payload toggles dark/light,
+   Shadcn components auto-adapt seamlessly.
+   ────────────────────────────────────────────────────────────── */
 @layer base {
   :root {
-    --background: var(--theme-bg);
-    --foreground: var(--theme-elevation-900);
-    --card: var(--theme-elevation-50);
-    --border: var(--theme-elevation-150);
+    /* Core Shadcn mappings → Payload theme engine */
+    --background: var(--theme-bg, #ffffff);
+    --foreground: var(--theme-elevation-900, #0f0f0f);
+
+    --card: var(--theme-elevation-50, #fafafa);
+    --card-foreground: var(--theme-elevation-900, #0f0f0f);
+
+    --popover: var(--theme-elevation-50, #fafafa);
+    --popover-foreground: var(--theme-elevation-900, #0f0f0f);
+
     --primary: var(--color-brand-primary);
-    
-    /* Custom Payload overrides / legacy */
+    --primary-foreground: #ffffff;
+
+    --secondary: var(--theme-elevation-100, #f0f0f0);
+    --secondary-foreground: var(--theme-elevation-800, #1f1f1f);
+
+    --muted: var(--theme-elevation-100, #f0f0f0);
+    --muted-foreground: var(--theme-elevation-500, #737373);
+
+    --accent: var(--theme-elevation-100, #f0f0f0);
+    --accent-foreground: var(--theme-elevation-800, #1f1f1f);
+
+    --destructive: #ef4444;
+    --destructive-foreground: #ffffff;
+
+    --border: var(--theme-elevation-150, #e5e5e5);
+    --input: var(--theme-elevation-150, #e5e5e5);
+    --ring: var(--color-brand-primary);
+
+    --radius: 0.75rem;
+
+    /* Legacy brand tokens */
     --sidebar-bg: #001529;
-    --card-bg: #ffffff;
     --luxury-black: #1a1a1a;
     --luxury-gold: #D4AF37;
     --luxury-gold-dark: #B8941F;
@@ -32,20 +69,42 @@
     background-color: var(--background);
     color: var(--foreground);
     font-family: var(--font-outfit);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
 
+/* ──────────────────────────────────────────────────────────────
+   UTILITIES — Brand Typography
+   ────────────────────────────────────────────────────────────── */
 @layer utilities {
   .font-italiana {
     font-family: var(--font-italiana);
   }
+
   .font-outfit {
     font-family: var(--font-outfit);
   }
+
+  .text-brand {
+    color: var(--color-brand-primary);
+  }
+
+  .bg-brand {
+    background-color: var(--color-brand-primary);
+  }
+
+  .border-brand {
+    border-color: var(--color-brand-primary);
+  }
 }
 
+/* ──────────────────────────────────────────────────────────────
+   COMPONENTS — Payload Admin Overrides
+   ────────────────────────────────────────────────────────────── */
 @layer components {
-  /* Luxury Button Overrides */
+
+  /* Ant Design primary button → Luxury feel */
   .ant-btn-primary {
     background-color: var(--luxury-black) !important;
     border-color: var(--luxury-black) !important;
@@ -59,5 +118,52 @@
   .ant-btn-primary:focus {
     background-color: var(--luxury-black) !important;
     border-color: var(--luxury-gold) !important;
+  }
+
+  /* Dashboard stat card hover micro-animation */
+  .dashboard-stat-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .dashboard-stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px -5px rgba(139, 94, 60, 0.15);
+  }
+
+  /* Status badge styles */
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.25rem 0.625rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    line-height: 1;
+  }
+
+  .status-pending {
+    background: #fef3c7;
+    color: #92400e;
+  }
+
+  .status-paid {
+    background: #d1fae5;
+    color: #065f46;
+  }
+
+  .status-shipped {
+    background: #dbeafe;
+    color: #1e40af;
+  }
+
+  .status-delivered {
+    background: #d1fae5;
+    color: #065f46;
+  }
+
+  .status-cancelled {
+    background: #fee2e2;
+    color: #991b1b;
   }
 }

@@ -2,86 +2,252 @@ import React from 'react'
 import configPromise from '@/payload.config'
 import { getPayload } from 'payload'
 import { Gutter } from '@payloadcms/ui'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { ShoppingCart, Users, TrendingUp } from 'lucide-react'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Skeleton } from '@/components/ui/skeleton'
+import {
+    ShoppingCart,
+    Users,
+    TrendingUp,
+    DollarSign,
+    Plus,
+    ExternalLink,
+    Settings,
+    Package,
+    Clock,
+    ArrowUpRight,
+    ArrowDownRight,
+} from 'lucide-react'
 import { RecentOrdersTable } from './RecentOrdersTable'
 import { DashboardChart } from './DashboardChart'
 
 const mockChartData = [
-    { name: 'Jan', total: 1200 },
-    { name: 'Feb', total: 2100 },
-    { name: 'Mar', total: 1800 },
-    { name: 'Apr', total: 2400 },
-    { name: 'May', total: 2800 },
-    { name: 'Jun', total: 3200 },
+    { name: 'Oca', total: 4200 },
+    { name: 'Şub', total: 5800 },
+    { name: 'Mar', total: 4600 },
+    { name: 'Nis', total: 7200 },
+    { name: 'May', total: 8400 },
+    { name: 'Haz', total: 9600 },
+    { name: 'Tem', total: 8100 },
+    { name: 'Ağu', total: 11200 },
 ]
 
+const mockRecentActivity = [
+    { id: 1, action: 'Yeni sipariş oluşturuldu', detail: '#1042 — Kanvas Tablo', time: '2 dk önce' },
+    { id: 2, action: 'Ödeme alındı', detail: '#1041 — ₺2.450', time: '15 dk önce' },
+    { id: 3, action: 'Ürün güncellendi', detail: 'Abstract Ocean — Stok +5', time: '1 saat önce' },
+    { id: 4, action: 'Yeni kullanıcı kaydı', detail: 'collector@luiff.art', time: '3 saat önce' },
+    { id: 5, action: 'Kargo gönderildi', detail: '#1039 — Yurtiçi Kargo', time: '5 saat önce' },
+]
+
+interface StatCardProps {
+    title: string
+    value: string | number
+    description: string
+    icon: React.ReactNode
+    trend?: 'up' | 'down'
+    trendValue?: string
+}
+
+function StatCard({ title, value, description, icon, trend, trendValue }: StatCardProps) {
+    return (
+        <Card className="dashboard-stat-card shadow-sm border-border/50">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
+                <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                    {icon}
+                </div>
+            </CardHeader>
+            <CardContent>
+                <div className="text-3xl font-bold tracking-tight">{value}</div>
+                <div className="flex items-center gap-1 mt-1">
+                    {trend === 'up' && <ArrowUpRight className="h-3 w-3 text-emerald-500" strokeWidth={2.5} />}
+                    {trend === 'down' && <ArrowDownRight className="h-3 w-3 text-red-500" strokeWidth={2.5} />}
+                    {trendValue && (
+                        <span className={`text-xs font-medium ${trend === 'up' ? 'text-emerald-500' : 'text-red-500'}`}>
+                            {trendValue}
+                        </span>
+                    )}
+                    <span className="text-xs text-muted-foreground">{description}</span>
+                </div>
+            </CardContent>
+        </Card>
+    )
+}
+
+function ActivityItem({ action, detail, time }: { action: string; detail: string; time: string }) {
+    return (
+        <div className="flex items-start gap-3 py-3 border-b border-border/50 last:border-0">
+            <div className="h-2 w-2 rounded-full bg-primary mt-2 shrink-0" />
+            <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium leading-tight">{action}</p>
+                <p className="text-xs text-muted-foreground mt-0.5 truncate">{detail}</p>
+            </div>
+            <span className="text-xs text-muted-foreground whitespace-nowrap">{time}</span>
+        </div>
+    )
+}
+
 export default async function CustomDashboard() {
-    const payload = await getPayload({ config: configPromise })
+    let orders = { totalDocs: 0, docs: [] as any[] }
+    let users = { totalDocs: 0 }
 
-    const orders = await payload.find({
-        collection: 'orders',
-        depth: 0,
-        limit: 10,
-        sort: '-createdAt'
-    })
+    try {
+        const payload = await getPayload({ config: configPromise })
 
-    const users = await payload.find({
-        collection: 'users',
-        depth: 0,
-        limit: 1,
-    })
+        orders = await payload.find({
+            collection: 'orders',
+            depth: 0,
+            limit: 10,
+            sort: '-createdAt'
+        }) as any
+
+        users = await payload.find({
+            collection: 'users',
+            depth: 0,
+            limit: 1,
+        })
+    } catch (e) {
+        console.error('Dashboard data fetch failed:', e)
+    }
+
+    // Calculate mock revenue
+    const mockRevenue = orders.docs.reduce((acc: number, order: any) => {
+        return acc + (parseFloat(order?.totalAmount) || 0)
+    }, 0)
+    const formattedRevenue = new Intl.NumberFormat('tr-TR', {
+        style: 'currency',
+        currency: 'TRY',
+        minimumFractionDigits: 0,
+    }).format(mockRevenue || 24650)
 
     return (
         <Gutter className="py-8">
             <div className="flex flex-col gap-8">
-                <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Luiff Art Analytics & Dashboard</h1>
-                    <p className="text-muted-foreground mt-2">Executive overview of your gallery's performance.</p>
+
+                {/* ─── Header: Title + Quick Actions ─── */}
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div>
+                        <h1 className="text-3xl font-bold tracking-tight">
+                            Luiff Art <span className="text-brand">Dashboard</span>
+                        </h1>
+                        <p className="text-muted-foreground mt-1">
+                            Executive overview of your gallery&apos;s performance.
+                        </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Button variant="default" size="sm" className="bg-brand hover:bg-brand-primary-dark text-white">
+                            <Plus className="h-4 w-4" strokeWidth={1.5} />
+                            Add Product
+                        </Button>
+                        <Button variant="outline" size="sm">
+                            <ExternalLink className="h-4 w-4" strokeWidth={1.5} />
+                            View Store
+                        </Button>
+                        <Button variant="ghost" size="icon">
+                            <Settings className="h-4 w-4" strokeWidth={1.5} />
+                        </Button>
+                    </div>
                 </div>
 
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Total Orders</CardTitle>
-                            <ShoppingCart className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">{orders.totalDocs}</div>
-                            <p className="text-xs text-muted-foreground">+20.1% from last month</p>
-                        </CardContent>
-                    </Card>
+                {/* ─── Row 1: Stat Cards ─── */}
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                    <StatCard
+                        title="Total Orders"
+                        value={orders.totalDocs}
+                        description="from last month"
+                        icon={<ShoppingCart className="h-4 w-4 text-brand" strokeWidth={1.5} />}
+                        trend="up"
+                        trendValue="+12.5%"
+                    />
+                    <StatCard
+                        title="Registered Users"
+                        value={users.totalDocs}
+                        description="artists & collectors"
+                        icon={<Users className="h-4 w-4 text-brand" strokeWidth={1.5} />}
+                        trend="up"
+                        trendValue="+8.2%"
+                    />
+                    <StatCard
+                        title="Revenue"
+                        value={formattedRevenue}
+                        description="this period"
+                        icon={<DollarSign className="h-4 w-4 text-brand" strokeWidth={1.5} />}
+                        trend="up"
+                        trendValue="+23.1%"
+                    />
+                    <StatCard
+                        title="Active Products"
+                        value="48"
+                        description="in catalog"
+                        icon={<Package className="h-4 w-4 text-brand" strokeWidth={1.5} />}
+                        trend="up"
+                        trendValue="+4"
+                    />
+                </div>
 
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Registered Users</CardTitle>
-                            <Users className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
+                {/* ─── Row 2: Chart (2/3) + Activity (1/3) ─── */}
+                <div className="grid gap-6 lg:grid-cols-3">
+                    {/* Sales Trends Chart */}
+                    <Card className="lg:col-span-2 shadow-sm border-border/50">
+                        <CardHeader>
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <CardTitle className="text-lg">Sales Trends</CardTitle>
+                                    <CardDescription>Monthly revenue overview for 2024</CardDescription>
+                                </div>
+                                <TrendingUp className="h-5 w-5 text-muted-foreground" strokeWidth={1.5} />
+                            </div>
                         </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">{users.totalDocs}</div>
-                            <p className="text-xs text-muted-foreground">+180 new artists and collectors</p>
-                        </CardContent>
-                    </Card>
-
-                    <Card className="col-span-1 md:col-span-2 lg:col-span-1">
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Sales Trends (Mock)</CardTitle>
-                            <TrendingUp className="h-4 w-4 text-muted-foreground" strokeWidth={1.5} />
-                        </CardHeader>
-                        <CardContent className="h-[90px]">
+                        <CardContent className="h-[280px]">
                             <DashboardChart data={mockChartData} />
                         </CardContent>
                     </Card>
+
+                    {/* Recent Activity */}
+                    <Card className="shadow-sm border-border/50">
+                        <CardHeader>
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <CardTitle className="text-lg">Recent Activity</CardTitle>
+                                    <CardDescription>Latest store events</CardDescription>
+                                </div>
+                                <Clock className="h-5 w-5 text-muted-foreground" strokeWidth={1.5} />
+                            </div>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="flex flex-col">
+                                {mockRecentActivity.map((item) => (
+                                    <ActivityItem
+                                        key={item.id}
+                                        action={item.action}
+                                        detail={item.detail}
+                                        time={item.time}
+                                    />
+                                ))}
+                            </div>
+                        </CardContent>
+                    </Card>
                 </div>
 
-                <Card>
+                {/* ─── Row 3: Orders Table ─── */}
+                <Card className="shadow-sm border-border/50">
                     <CardHeader>
-                        <CardTitle>Recent Orders</CardTitle>
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <CardTitle className="text-lg">Recent Orders</CardTitle>
+                                <CardDescription>Your last 10 orders</CardDescription>
+                            </div>
+                            <Button variant="outline" size="sm">
+                                View All
+                            </Button>
+                        </div>
                     </CardHeader>
                     <CardContent>
                         <RecentOrdersTable orders={orders} />
                     </CardContent>
                 </Card>
+
             </div>
         </Gutter>
     )
