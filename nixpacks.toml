@@ -7,7 +7,7 @@ NODE_ENV = "production"
 cmds = ["npm install --legacy-peer-deps"]
 
 [phases.build]
-cmds = ["npx prisma generate", "npm run build"]
+cmds = ["npx prisma generate", "npm run build", "cp -r .next/static .next/standalone/.next/static", "cp -r public .next/standalone/public"]
 
 [start]
-cmd = "node .next/standalone/server.js"
+cmd = "cd .next/standalone && node server.js"
